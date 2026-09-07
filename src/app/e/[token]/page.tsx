@@ -53,6 +53,15 @@ export default async function EntidadPage({
   const nombrePersona = new Map(personasList.map((p) => [p.id, p.nombre]));
   const historial = ventas.slice(0, 100);
 
+  const porPersona = new Map<string, { confirmado: number; vendidas: number }>();
+  for (const v of ventas) {
+    if (!v.persona_id) continue;
+    const acc = porPersona.get(v.persona_id) ?? { confirmado: 0, vendidas: 0 };
+    acc.vendidas += 1;
+    if (v.estado === "pagado" || v.estado === "liquidado") acc.confirmado += Number(v.importe);
+    porPersona.set(v.persona_id, acc);
+  }
+
   return (
     <div className="min-h-screen bg-[#EDE6D8]">
       <header className="bg-[#5B1220] px-6 py-5 text-[#E9D6A8]">
@@ -98,28 +107,48 @@ export default async function EntidadPage({
           ))}
         </div>
 
-        {!sinPapeletas && personasList.length > 0 && (
+        {personasList.length > 0 && (
           <>
-            <h2 className="mb-3 mt-8 font-serif text-base text-[#5B1220]">Costaleros</h2>
+            <h2 className="mb-3 mt-8 font-serif text-base text-[#5B1220]">
+              {sinPapeletas ? "Donantes registrados" : "Costaleros"}
+            </h2>
             <div className="overflow-x-auto rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[#E4D8C4] text-left text-[11px] uppercase tracking-wide text-[#8A7B6C]">
                     <th className="px-3 py-2">Nombre</th>
-                    <th className="px-3 py-2">Números</th>
+                    {!sinPapeletas && <th className="px-3 py-2">Números</th>}
+                    <th className="px-3 py-2">Confirmado</th>
+                    <th className="px-3 py-2">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {personasList.map((p) => (
-                    <tr key={p.id} className="border-b border-[#E4D8C4] last:border-0">
-                      <td className="px-3 py-2">{p.nombre}</td>
-                      <td className="px-3 py-2">
-                        {p.rango_inicio !== null
-                          ? `${String(p.rango_inicio).padStart(4, "0")}–${String(p.rango_fin).padStart(4, "0")}`
-                          : "—"}
-                      </td>
-                    </tr>
-                  ))}
+                  {personasList.map((p) => {
+                    const stats = porPersona.get(p.id) ?? { confirmado: 0, vendidas: 0 };
+                    const haColaborado = stats.confirmado > 0;
+                    return (
+                      <tr key={p.id} className="border-b border-[#E4D8C4] last:border-0">
+                        <td className="px-3 py-2">{p.nombre}</td>
+                        {!sinPapeletas && (
+                          <td className="px-3 py-2">
+                            {p.rango_inicio !== null
+                              ? `${String(p.rango_inicio).padStart(4, "0")}–${String(p.rango_fin).padStart(4, "0")}`
+                              : "—"}
+                          </td>
+                        )}
+                        <td className="px-3 py-2">{euro.format(stats.confirmado)}</td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                              haColaborado ? "bg-[#4B6C4C] text-[#FFFBF3]" : "bg-[#E9D6A8] text-[#3E0C16]"
+                            }`}
+                          >
+                            {haColaborado ? "Ha colaborado" : "Registrado, pendiente"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
