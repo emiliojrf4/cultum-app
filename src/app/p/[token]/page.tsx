@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { Campana, Persona, Venta } from "@/lib/types";
+import { PUBLIC_CAMPANA_COLUMNS, type Campana, type Persona, type Venta } from "@/lib/types";
 import { DonanteFlow } from "./donante-flow";
 import { CostaleroPanel } from "./costalero-panel";
 
@@ -19,7 +19,7 @@ export default async function PersonaLinkPage({
 
   const { data: campana } = await supabase
     .from("campanas")
-    .select("*")
+    .select(PUBLIC_CAMPANA_COLUMNS)
     .eq("id", persona.campana_id)
     .single();
   if (!campana) notFound();

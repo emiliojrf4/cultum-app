@@ -21,6 +21,12 @@ export interface Campana {
   created_at: string;
 }
 
+// Columnas de `campanas` legibles por el rol anon (ver migración
+// 0011_restringir_entidad_token.sql). No incluye entidad_token: consultas
+// públicas deben pedir esta lista explícita, nunca "*".
+export const PUBLIC_CAMPANA_COLUMNS =
+  "id, nombre, entidad_nombre, tipo, precio_papeleta, importe_sugerido, total_papeletas, descripcion, objetivo, obsequio_nombre, premio_nombre, fecha_texto, autorizacion_junta, activa, created_at";
+
 export type RolPersona = "vendedor" | "donante";
 
 export interface Persona {

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import type { Campana } from "@/lib/types";
+import { PUBLIC_CAMPANA_COLUMNS, type Campana } from "@/lib/types";
 import { PurchaseFlow } from "./purchase-flow";
 
 export default async function CampanaPage({
@@ -11,7 +11,7 @@ export default async function CampanaPage({
   const { id } = await params;
   const { data } = await supabase
     .from("campanas")
-    .select("*")
+    .select(PUBLIC_CAMPANA_COLUMNS)
     .eq("id", id)
     .eq("activa", true)
     .single();
