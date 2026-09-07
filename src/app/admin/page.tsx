@@ -48,7 +48,7 @@ export default async function AdminPage() {
       </div>
 
       <p className="mb-6 -mt-2 text-sm text-[#8A7B6C]">
-        Esta vista la usáis vosotros para dar de alta cada campaña y generar los enlaces de costalero
+        Esta vista la usáis vosotros para dar de alta cada campaña y generar los enlaces de colaborador
         o donante — la entidad y sus colaboradores nunca entran aquí ni se registran en ningún sitio.
       </p>
 

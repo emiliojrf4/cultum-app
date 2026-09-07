@@ -133,3 +133,46 @@ export async function eliminarPersona(personaId: string, campanaId: string) {
 
   revalidatePath(`/admin/campanas/${campanaId}`);
 }
+
+export async function ampliarCupo(personaId: string, campanaId: string, cantidad = 10) {
+  const [{ data: persona, error: personaError }, { data: campana, error: campanaError }] = await Promise.all([
+    supabaseAdmin.from("personas").select("rango_inicio, rango_fin").eq("id", personaId).single(),
+    supabaseAdmin.from("campanas").select("total_papeletas").eq("id", campanaId).single(),
+  ]);
+
+  if (personaError || !persona || persona.rango_fin === null) {
+    throw new Error("Esta persona no tiene cupo de papeletas");
+  }
+  if (campanaError || !campana || campana.total_papeletas === null) {
+    throw new Error("Campaña no encontrada");
+  }
+
+  const { data: otros } = await supabaseAdmin
+    .from("personas")
+    .select("rango_fin")
+    .eq("campana_id", campanaId)
+    .not("rango_fin", "is", null)
+    .order("rango_fin", { ascending: false })
+    .limit(1);
+
+  const maxAsignado = otros?.[0]?.rango_fin ?? 0;
+  if (maxAsignado > persona.rango_fin) {
+    throw new Error(
+      "No se puede ampliar: ya hay números asignados por encima de su rango. Añade un colaborador nuevo en su lugar.",
+    );
+  }
+
+  const nuevoFin = persona.rango_fin + cantidad;
+  if (nuevoFin > campana.total_papeletas) {
+    throw new Error(
+      `Solo quedan ${Math.max(0, campana.total_papeletas - persona.rango_fin)} papeletas sin asignar en esta campaña.`,
+    );
+  }
+
+  const { error } = await supabaseAdmin.from("personas").update({ rango_fin: nuevoFin }).eq("id", personaId);
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/admin/campanas/${campanaId}`);
+}

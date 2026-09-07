@@ -30,7 +30,7 @@ export function PersonaForm({ campanaId, sinPapeletas }: { campanaId: string; si
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Nombre {sinPapeletas ? "del donante" : "del costalero"}</label>
+          <label className={labelClass}>Nombre {sinPapeletas ? "del donante" : "del colaborador"}</label>
           <input name="nombre" required className={inputClass} placeholder="Nombre y apellido" />
         </div>
         <div>
@@ -55,7 +55,7 @@ export function PersonaForm({ campanaId, sinPapeletas }: { campanaId: string; si
         disabled={pending}
         className="rounded-lg bg-[#5B1220] px-4 py-2 text-sm font-semibold text-[#E9D6A8] disabled:opacity-60"
       >
-        {pending ? "Añadiendo…" : `Añadir ${sinPapeletas ? "donante" : "costalero"} y generar enlace`}
+        {pending ? "Añadiendo…" : `Añadir ${sinPapeletas ? "donante" : "colaborador"} y generar enlace`}
       </button>
     </form>
   );

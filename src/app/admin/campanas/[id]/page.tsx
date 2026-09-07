@@ -90,7 +90,7 @@ export default async function CampanaAdminPage({
 
       <div className="mb-6 rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3] p-4">
         <p className="mb-2 text-xs text-[#8A7B6C]">
-          Enlace de seguimiento para la entidad (solo lectura, sin contraseña — pásaselo a la hermandad):
+          Enlace de seguimiento para la entidad (solo lectura, sin contraseña — pásaselo a la entidad):
         </p>
         <CopyLink url={`${SITE_URL}/e/${c.entidad_token}`} />
       </div>
@@ -122,7 +122,7 @@ export default async function CampanaAdminPage({
       </div>
 
       <h3 className="mb-3 font-serif text-base text-[#5B1220]">
-        {sinPapeletas ? "Donantes autoregistrados" : "Costaleros"}
+        {sinPapeletas ? "Donantes autoregistrados" : "Colaboradores"}
       </h3>
 
       <div className="mb-6 overflow-x-auto rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3]">
@@ -153,7 +153,7 @@ export default async function CampanaAdminPage({
             {!personasList.length && (
               <tr>
                 <td colSpan={sinPapeletas ? 5 : 8} className="px-3 py-3 text-[#8A7B6C]">
-                  Todavía no hay {sinPapeletas ? "donantes" : "costaleros"} dados de alta.
+                  Todavía no hay {sinPapeletas ? "donantes" : "colaboradores"} dados de alta.
                 </td>
               </tr>
             )}

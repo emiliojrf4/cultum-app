@@ -182,8 +182,8 @@ export function CostaleroPanel({
       {screen === "home" && (
         <>
           <p className="text-xs uppercase tracking-wide text-[#8A7B6C]">{campana.entidad_nombre}</p>
-          <h1 className="mt-1 font-serif text-2xl text-[#5B1220]">Mi cupo</h1>
-          <p className="mt-1 text-sm text-[#8A7B6C]">{campana.nombre}</p>
+          <h1 className="mt-1 font-serif text-2xl text-[#5B1220]">Hola, {persona.nombre}</h1>
+          <p className="mt-1 text-sm text-[#8A7B6C]">{campana.nombre} · Mi cupo</p>
           <p className="mt-3 text-xs text-[#8A7B6C]">
             Números asignados:{" "}
             <b className="text-[#2A211C]">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { actualizarPersona, eliminarPersona } from "../../actions";
+import { actualizarPersona, ampliarCupo, eliminarPersona } from "../../actions";
 import { CopyLink } from "./copy-link";
 import type { Persona } from "@/lib/types";
 
@@ -37,6 +37,18 @@ export function PersonaRow({
       setEditando(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo guardar");
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  async function ampliar() {
+    setGuardando(true);
+    setError(null);
+    try {
+      await ampliarCupo(persona.id, campanaId, 10);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo ampliar el cupo");
     } finally {
       setGuardando(false);
     }
@@ -108,9 +120,25 @@ export function PersonaRow({
       <td className="px-3 py-2">{persona.telefono}</td>
       {!sinPapeletas && (
         <td className="px-3 py-2">
-          {persona.rango_inicio !== null
-            ? `${String(persona.rango_inicio).padStart(4, "0")}–${String(persona.rango_fin).padStart(4, "0")}`
-            : "—"}
+          <div className="flex items-center gap-2">
+            <span>
+              {persona.rango_inicio !== null
+                ? `${String(persona.rango_inicio).padStart(4, "0")}–${String(persona.rango_fin).padStart(4, "0")}`
+                : "—"}
+            </span>
+            {persona.rango_inicio !== null && (
+              <button
+                type="button"
+                onClick={ampliar}
+                disabled={guardando}
+                className="whitespace-nowrap rounded border border-[#E4D8C4] px-1.5 py-0.5 text-[11px] text-[#5B1220] disabled:opacity-60"
+                title="Ampliar cupo en 10 papeletas"
+              >
+                +10
+              </button>
+            )}
+          </div>
+          {error && <p className="mt-1 max-w-[180px] whitespace-normal text-[11px] text-red-700">{error}</p>}
         </td>
       )}
       {!sinPapeletas && <td className="px-3 py-2">{stats.vendidas}</td>}

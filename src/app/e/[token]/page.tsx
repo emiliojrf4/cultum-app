@@ -93,7 +93,7 @@ export default async function EntidadPage({
           {!sinPapeletas && (
             <p className="mt-3 text-xs text-[#8A7B6C]">
               {asignadas} / {c.total_papeletas} papeletas asignadas · {personasList.length}{" "}
-              {personasList.length === 1 ? "costalero" : "costaleros"}
+              {personasList.length === 1 ? "colaborador" : "colaboradores"}
             </p>
           )}
         </div>
@@ -110,7 +110,7 @@ export default async function EntidadPage({
         {personasList.length > 0 && (
           <>
             <h2 className="mb-3 mt-8 font-serif text-base text-[#5B1220]">
-              {sinPapeletas ? "Donantes registrados" : "Costaleros"}
+              {sinPapeletas ? "Donantes registrados" : "Colaboradores"}
             </h2>
             <div className="overflow-x-auto rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3]">
               <table className="w-full text-sm">
