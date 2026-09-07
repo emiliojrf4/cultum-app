@@ -15,6 +15,7 @@ export interface Campana {
   obsequio_nombre: string | null;
   premio_nombre: string | null;
   fecha_texto: string | null;
+  entidad_token: string;
   autorizacion_junta: boolean;
   activa: boolean;
   created_at: string;

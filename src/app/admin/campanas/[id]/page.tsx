@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import type { Campana, MetodoPago, Persona, Venta } from "@/lib/types";
@@ -71,6 +72,9 @@ export default async function CampanaAdminPage({
 
   return (
     <div>
+      <Link href="/admin" className="mb-4 inline-block text-sm text-[#5B1220]">
+        ← Volver a campañas
+      </Link>
       <p className="text-xs uppercase tracking-wide text-[#8A7B6C]">{c.entidad_nombre}</p>
       <h2 className="mb-1 font-serif text-lg text-[#5B1220]">{c.nombre}</h2>
       <p className="mb-4 text-sm text-[#8A7B6C]">
@@ -79,9 +83,16 @@ export default async function CampanaAdminPage({
         {!sinPapeletas && ` · ${asignadas} / ${c.total_papeletas} papeletas asignadas`}
       </p>
 
-      <div className="mb-6 rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3] p-4">
+      <div className="mb-4 rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3] p-4">
         <p className="mb-2 text-xs text-[#8A7B6C]">Enlace público de compra (compártelo directamente):</p>
         <CopyLink url={`${SITE_URL}/c/${c.id}`} />
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3] p-4">
+        <p className="mb-2 text-xs text-[#8A7B6C]">
+          Enlace de seguimiento para la entidad (solo lectura, sin contraseña — pásaselo a la hermandad):
+        </p>
+        <CopyLink url={`${SITE_URL}/e/${c.entidad_token}`} />
       </div>
 
       <h3 className="mb-3 font-serif text-base text-[#5B1220]">Recaudación</h3>
