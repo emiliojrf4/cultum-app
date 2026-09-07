@@ -11,7 +11,7 @@ export async function GET() {
 
   const { error, count } = await supabase
     .from("campanas")
-    .select("*", { count: "exact", head: true });
+    .select("id", { count: "exact", head: true });
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
