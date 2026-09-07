@@ -9,6 +9,10 @@ export async function POST(req: NextRequest) {
   const campanaNombre = body?.campanaNombre as string | undefined;
   const cantidad = body?.cantidad as number | undefined;
   const metodoPago = body?.metodoPago as string | undefined;
+  const personaId = (body?.personaId as string | undefined) || null;
+  const compradorNombre = (body?.compradorNombre as string | undefined) || null;
+  const compradorTelefono = (body?.compradorTelefono as string | undefined) || null;
+  const volverA = (body?.volverA as string | undefined) || `/c/${campanaId}`;
 
   if (!campanaId || !campanaNombre || !cantidad || cantidad < 1 || cantidad > 50) {
     return NextResponse.json({ error: "Datos de compra inválidos" }, { status: 400 });
@@ -19,10 +23,10 @@ export async function POST(req: NextRequest) {
 
   const { data: ventas, error: rpcError } = await supabase.rpc("crear_venta", {
     p_campana_id: campanaId,
-    p_persona_id: null,
+    p_persona_id: personaId,
     p_cantidad: cantidad,
-    p_comprador_nombre: null,
-    p_comprador_telefono: null,
+    p_comprador_nombre: compradorNombre,
+    p_comprador_telefono: compradorTelefono,
     p_metodo_pago: metodoPago,
   });
 
@@ -55,7 +59,7 @@ export async function POST(req: NextRequest) {
       ],
       metadata: { venta_ids: ventaIds.join(",") },
       success_url: `${req.nextUrl.origin}/c/${campanaId}/gracias?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.nextUrl.origin}/c/${campanaId}`,
+      cancel_url: `${req.nextUrl.origin}${volverA}`,
     });
 
     return NextResponse.json({ url: session.url });

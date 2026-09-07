@@ -11,8 +11,26 @@ export interface Campana {
   importe_sugerido: number | null;
   total_papeletas: number | null;
   descripcion: string | null;
+  objetivo: number | null;
+  obsequio_nombre: string | null;
+  premio_nombre: string | null;
+  fecha_texto: string | null;
   autorizacion_junta: boolean;
   activa: boolean;
+  created_at: string;
+}
+
+export type RolPersona = "vendedor" | "donante";
+
+export interface Persona {
+  id: string;
+  campana_id: string;
+  nombre: string;
+  telefono: string;
+  rol: RolPersona;
+  rango_inicio: number | null;
+  rango_fin: number | null;
+  enlace_token: string;
   created_at: string;
 }
 
