@@ -15,13 +15,25 @@ const TIPO_LABEL: Record<Campana["tipo"], string> = {
 export default async function AdminPage() {
   const [{ data: campanas }, { data: ventas }] = await Promise.all([
     supabaseAdmin.from("campanas").select("*").order("created_at", { ascending: false }),
-    supabaseAdmin.from("ventas").select("campana_id, importe, estado").in("estado", ["pagado", "liquidado"]),
+    supabaseAdmin.from("ventas").select("campana_id, importe, estado, metodo_pago"),
   ]);
 
   const recaudadoPorCampana = new Map<string, number>();
+  let totalRecaudado = 0;
+  let totalPendienteEfectivo = 0;
+  let totalPendienteCobro = 0;
   for (const v of ventas ?? []) {
-    recaudadoPorCampana.set(v.campana_id, (recaudadoPorCampana.get(v.campana_id) ?? 0) + Number(v.importe));
+    const importe = Number(v.importe);
+    if (v.estado === "pagado" || v.estado === "liquidado") {
+      recaudadoPorCampana.set(v.campana_id, (recaudadoPorCampana.get(v.campana_id) ?? 0) + importe);
+      totalRecaudado += importe;
+    } else if (v.estado === "pendiente" && v.metodo_pago === "efectivo") {
+      totalPendienteEfectivo += importe;
+    } else if (v.estado === "pendiente") {
+      totalPendienteCobro += importe;
+    }
   }
+  const campanasActivas = (campanas as Campana[] | null)?.filter((c) => c.activa).length ?? 0;
 
   return (
     <div>
@@ -39,6 +51,25 @@ export default async function AdminPage() {
         Esta vista la usáis vosotros para dar de alta cada campaña y generar los enlaces de costalero
         o donante — la entidad y sus colaboradores nunca entran aquí ni se registran en ningún sitio.
       </p>
+
+      <div className="mb-8 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        <div className="rounded-xl border border-[#E4D8C4] bg-[#FFFBF3] p-3">
+          <div className="text-lg font-bold text-[#5B1220]">{euro.format(totalRecaudado)}</div>
+          <div className="mt-1 text-[11px] leading-tight text-[#8A7B6C]">Recaudado (todas las campañas)</div>
+        </div>
+        <div className="rounded-xl border border-[#E4D8C4] bg-[#FFFBF3] p-3">
+          <div className="text-lg font-bold text-[#93641F]">{euro.format(totalPendienteEfectivo)}</div>
+          <div className="mt-1 text-[11px] leading-tight text-[#8A7B6C]">Efectivo sin liquidar</div>
+        </div>
+        <div className="rounded-xl border border-[#E4D8C4] bg-[#FFFBF3] p-3">
+          <div className="text-lg font-bold text-[#93641F]">{euro.format(totalPendienteCobro)}</div>
+          <div className="mt-1 text-[11px] leading-tight text-[#8A7B6C]">Bizum/tarjeta sin cobrar</div>
+        </div>
+        <div className="rounded-xl border border-[#E4D8C4] bg-[#FFFBF3] p-3">
+          <div className="text-lg font-bold text-[#5B1220]">{campanasActivas}</div>
+          <div className="mt-1 text-[11px] leading-tight text-[#8A7B6C]">Campañas activas</div>
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         {(campanas as Campana[] | null)?.map((c) => {
