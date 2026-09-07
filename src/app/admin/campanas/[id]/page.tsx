@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import type { Campana, MetodoPago, Persona, Venta } from "@/lib/types";
 import { PersonaForm } from "./persona-form";
+import { CopyLink } from "./copy-link";
+
+const SITE_URL = "https://cultum-app.vercel.app";
 
 const euro = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
 const fecha = new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
@@ -77,9 +80,7 @@ export default async function CampanaAdminPage({
 
       <div className="mb-6 rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3] p-4">
         <p className="mb-2 text-xs text-[#8A7B6C]">Enlace público de compra (compártelo directamente):</p>
-        <code className="block break-all rounded-lg border border-[#E4D8C4] bg-white px-3 py-2 text-xs">
-          https://cultum-app.vercel.app/c/{c.id}
-        </code>
+        <CopyLink url={`${SITE_URL}/c/${c.id}`} />
       </div>
 
       <h3 className="mb-3 font-serif text-base text-[#5B1220]">Recaudación</h3>
@@ -151,7 +152,7 @@ export default async function CampanaAdminPage({
                     </td>
                   )}
                   <td className="px-3 py-2">
-                    <code className="text-xs text-[#8A7B6C]">/p/{p.enlace_token}</code>
+                    <CopyLink url={`${SITE_URL}/p/${p.enlace_token}`} compact />
                   </td>
                 </tr>
               );
