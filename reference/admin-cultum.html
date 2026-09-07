@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cultum — Panel de gestión</title>
+<style>
+  :root{
+    --cream:#F6EFE3; --paper:#FFFBF3; --burgundy:#5B1220; --burgundy-dark:#3E0C16;
+    --gold:#B8862F; --gold-light:#E9D6A8; --ink:#2A211C; --muted:#8A7B6C; --line:#E4D8C4; --ok:#4B6C4C;
+    --font-display: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:#EDE6D8; font-family:var(--font-body); color:var(--ink);}
+  .topbar{background:var(--burgundy); color:var(--gold-light); padding:18px 32px; display:flex; align-items:center; justify-content:space-between;}
+  .topbar h1{font-family:var(--font-display); font-weight:normal; font-size:20px; margin:0;}
+  .topbar span{font-size:12px; color:var(--gold-light); opacity:0.8;}
+  .wrap{max-width:920px; margin:0 auto; padding:28px 24px 60px;}
+  .section-head{display:flex; justify-content:space-between; align-items:center; margin:34px 0 14px;}
+  .section-head:first-child{margin-top:0;}
+  .section-head h2{font-family:var(--font-display); font-weight:normal; font-size:19px; color:var(--burgundy); margin:0;}
+  .note{font-size:13px; color:var(--muted); margin:-6px 0 18px;}
+
+  .btn{background:var(--burgundy); color:var(--gold-light); border:none; border-radius:8px; padding:10px 16px; font-size:13.5px; font-weight:600; cursor:pointer; font-family:var(--font-body);}
+  .btn:hover{background:var(--burgundy-dark);}
+  .btn-ghost{background:transparent; color:var(--burgundy); border:1px solid var(--burgundy); border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer;}
+  .btn-small{padding:6px 12px; font-size:12.5px;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px;}
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:16px;}
+  .card h3{margin:0 0 2px; font-size:15px;}
+  .card p.sub{margin:0 0 10px; font-size:12.5px; color:var(--muted);}
+  .progress-track{height:5px; border-radius:4px; background:var(--line); margin:8px 0 10px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--gold);}
+  .card .meta{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:12px;}
+
+  .form-panel{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:24px; display:none;}
+  .form-panel.open{display:block;}
+  .form-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+  .form-row.full{grid-template-columns:1fr;}
+  .field label{display:block; font-size:12.5px; color:var(--muted); margin-bottom:5px;}
+  .field input, .field textarea{width:100%; border:1px solid var(--line); border-radius:8px; padding:10px; font-size:13.5px; background:#fff; font-family:var(--font-body); color:var(--ink);}
+  .field textarea{resize:vertical; min-height:56px;}
+  .form-actions{display:flex; gap:10px; margin-top:6px;}
+
+  .type-toggle{display:flex; gap:10px; margin-bottom:16px;}
+  .type-opt{flex:1; border:1px solid var(--line); border-radius:8px; padding:12px; cursor:pointer; text-align:center;}
+  .type-opt.selected{border-color:var(--burgundy); background:var(--gold-light);}
+  .type-opt .tt{font-size:13.5px; font-weight:600; color:var(--ink);}
+  .type-opt .ts{font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .type-block{display:none;}
+  .type-block.active{display:block;}
+  .legal-warning{background:#F8EEE4; border:1px solid var(--gold); border-radius:8px; padding:12px 14px; font-size:12.5px; color:var(--burgundy-dark); margin-bottom:14px; display:flex; gap:10px; align-items:flex-start;}
+  .legal-warning input{margin-top:2px; flex-shrink:0;}
+  .badge-type{display:inline-block; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; padding:3px 8px; border-radius:5px; margin-bottom:8px;}
+  .badge-type.donativo{background:var(--gold-light); color:var(--burgundy-dark);}
+  .badge-type.rifa{background:var(--burgundy); color:var(--gold-light);}
+
+  .costalero-view{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:24px; display:none;}
+  .costalero-view.open{display:block;}
+  .costalero-view .cv-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .costalero-view .cv-head h3{margin:0; font-family:var(--font-display); font-weight:normal; color:var(--burgundy);}
+  table{width:100%; border-collapse:collapse; margin-bottom:16px;}
+  th{text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:0.03em; color:var(--muted); padding:6px 8px; border-bottom:1px solid var(--line);}
+  td{font-size:13px; padding:9px 8px; border-bottom:1px solid var(--line);}
+  .link-cell{display:flex; align-items:center; gap:8px;}
+  .link-text{font-family:monospace; font-size:12px; color:var(--muted); background:#fff; border:1px solid var(--line); border-radius:6px; padding:4px 8px;}
+  .copied{color:var(--ok); font-size:12px; font-weight:600; margin-left:6px; display:none;}
+  .cupo-cell{display:flex; align-items:center; gap:6px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Cultum</h1>
+  <span>Panel de gestión (uso interno)</span>
+</div>
+
+<div class="wrap">
+  <p class="note">Esta vista la usáis vosotros para dar de alta cada campaña y generar los enlaces de costalero — la hermandad y los costaleros nunca entran aquí ni se registran en ningún sitio.</p>
+
+  <div class="section-head">
+    <h2>Campañas</h2>
+    <button class="btn" onclick="toggleForm()">+ Nueva campaña</button>
+  </div>
+
+  <div class="form-panel" id="form-panel">
+    <div class="type-toggle">
+      <div class="type-opt selected" id="type-donativo" onclick="setTipo('donativo')">
+        <div class="tt">Donativo</div>
+        <div class="ts">Con o sin obsequio, sin azar</div>
+      </div>
+      <div class="type-opt" id="type-rifa" onclick="setTipo('rifa')">
+        <div class="tt">Rifa autorizada</div>
+        <div class="ts">Premio por sorteo, con autorización</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field"><label>Entidad</label><input type="text" id="f-entidad" placeholder="Club Voleibol Triana, AMPA Colegio San José..."></div>
+      <div class="field"><label>Título de la campaña</label><input type="text" id="f-titulo" placeholder="Restauración de la Cruz de Mayo"></div>
+    </div>
+    <div class="form-row full">
+      <div class="field"><label>Descripción</label><textarea id="f-desc" placeholder="Para qué se usará el dinero recaudado"></textarea></div>
+    </div>
+
+    <div class="type-block active" id="block-donativo">
+      <div class="type-toggle">
+        <div class="type-opt selected" id="obsequio-si" onclick="setObsequio(true)">
+          <div class="tt">Con obsequio</div>
+          <div class="ts">Papeletas numeradas, precio fijo</div>
+        </div>
+        <div class="type-opt" id="obsequio-no" onclick="setObsequio(false)">
+          <div class="tt">Sin obsequio</div>
+          <div class="ts">Donativo libre, sin papeletas</div>
+        </div>
+      </div>
+
+      <div id="sub-con-obsequio">
+        <div class="form-row">
+          <div class="field"><label>Obsequio</label><input type="text" id="f-obsequio" placeholder="Pulsera bordada"></div>
+          <div class="field"><label>Donativo por papeleta (€)</label><input type="number" id="f-precio" placeholder="2"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Número total de papeletas</label><input type="number" id="f-total-papeletas" placeholder="1000"></div>
+          <div></div>
+        </div>
+      </div>
+
+      <div id="sub-sin-obsequio" style="display:none;">
+        <div class="form-row">
+          <div class="field"><label>Valor sugerido del donativo (€)</label><input type="number" id="f-valor-donativo" placeholder="20"></div>
+          <div></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field"><label>Objetivo de recaudación (€)</label><input type="number" id="f-objetivo" placeholder="5000"></div>
+        <div class="field"><label>Campaña abierta hasta</label><input type="text" id="f-fecha" placeholder="15 de junio"></div>
+      </div>
+    </div>
+
+    <div class="type-block" id="block-rifa">
+      <div class="form-row">
+        <div class="field"><label>Premio del sorteo</label><input type="text" id="f-premio" placeholder="Estancia de fin de semana"></div>
+        <div class="field"><label>Fecha del sorteo</label><input type="text" id="f-fecha-sorteo" placeholder="15 de junio"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Donativo por papeleta (€)</label><input type="number" id="f-precio-rifa" placeholder="3"></div>
+        <div class="field"><label>Número total de papeletas</label><input type="number" id="f-total-papeletas-rifa" placeholder="500"></div>
+      </div>
+      <div class="legal-warning">
+        <input type="checkbox" id="f-legal-check">
+        <label for="f-legal-check">Confirmo que la hermandad dispone de autorización de la Junta de Andalucía para esta rifa y ha constituido la fianza correspondiente.</label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn" onclick="crearCampana()">Guardar campaña</button>
+      <button class="btn-ghost" onclick="toggleForm()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="grid" id="campanas-grid"></div>
+
+  <div class="costalero-view" id="costalero-view">
+    <div class="cv-head">
+      <h3 id="cv-titulo">Costaleros de la campaña</h3>
+      <button class="btn-ghost btn-small" onclick="cerrarCostaleros()">Cerrar</button>
+    </div>
+    <table>
+      <thead id="costaleros-head"></thead>
+      <tbody id="costaleros-body"></tbody>
+    </table>
+    <div class="form-row">
+      <div class="field"><label>Nombre del costalero</label><input type="text" id="c-nombre" placeholder="Nombre y apellido"></div>
+      <div class="field"><label>Teléfono</label><input type="tel" id="c-telefono" placeholder="600 000 000"></div>
+    </div>
+    <div class="form-row" id="c-cupo-row">
+      <div class="field">
+        <label>Cupo asignado</label>
+        <input type="number" id="c-cupo" placeholder="10">
+        <div class="field-error" id="c-cupo-err" style="display:none; font-size:12px; color:#A32D2D; margin-top:5px;"></div>
+      </div>
+      <div></div>
+    </div>
+    <button class="btn" onclick="anadirCostalero()">Añadir costalero y generar enlace</button>
+
+    <div id="donativos-section" style="display:none; margin-top:28px;">
+      <div class="section-head" style="margin-top:0;">
+        <h2 style="font-size:16px;">Donativos por confirmar</h2>
+        <button class="btn-ghost btn-small" onclick="cargarDonativosCampana()">Actualizar</button>
+      </div>
+      <div id="donativos-list"><p class="note" style="margin:0;">Cargando…</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var campanas = [
+    {id:'esperanza', tipo:'donativo', entidad:'Hdad. de la Esperanza', titulo:'Restauración de la Cruz de Mayo', obsequio:'Pulsera bordada', precio:2, recaudado:3200, objetivo:5000, totalPapeletas:1000, siguienteNumero:19, codigoEntidad:'ent-esp01',
+     costaleros:[
+       {nombre:'Antonio Ruiz', telefono:'600111222', codigo:'xk29p', bloques:[{inicio:1, fin:10}]},
+       {nombre:'Manuel Ortega', telefono:'600333444', codigo:'m7qz1', bloques:[{inicio:11, fin:18}]}
+     ]},
+    {id:'silencio', tipo:'rifa', entidad:'Hdad. del Silencio', titulo:'Sorteo pro cera de Cuaresma', premio:'Estancia de fin de semana', fechaSorteo:'10 de mayo', precio:3, recaudado:800, objetivo:2000, totalPapeletas:500, siguienteNumero:16, codigoEntidad:'ent-sil02',
+     costaleros:[
+       {nombre:'Jesús Camacho', telefono:'600555666', codigo:'r4vb2', bloques:[{inicio:1, fin:15}]}
+     ]},
+    {id:'ohermandad', tipo:'donativo', tieneObsequio:false, entidad:'Hdad. de la O', titulo:'Donativo pro caridad', valorDonativo:20, recaudado:0, objetivo:1500, codigoEntidad:'ent-do03',
+     costaleros:[
+       {nombre:'Manuela Ríos', telefono:'600777888', codigo:'na4d1'}
+     ]}
+  ];
+  var vistaActual = null;
+  var tipoSeleccionado = 'donativo';
+  var incluyeObsequio = true;
+
+  function cupoDe(p){
+    if(!p.bloques){ return 0; }
+    return p.bloques.reduce(function(sum, b){ return sum + (b.fin - b.inicio + 1); }, 0);
+  }
+
+  function esSinPapeletas(c){
+    return c.tipo === 'donativo' && c.tieneObsequio === false;
+  }
+
+  function toggleForm(){
+    document.getElementById('form-panel').classList.toggle('open');
+  }
+
+  function setTipo(tipo){
+    tipoSeleccionado = tipo;
+    document.getElementById('type-donativo').classList.toggle('selected', tipo === 'donativo');
+    document.getElementById('type-rifa').classList.toggle('selected', tipo === 'rifa');
+    document.getElementById('block-donativo').classList.toggle('active', tipo === 'donativo');
+    document.getElementById('block-rifa').classList.toggle('active', tipo === 'rifa');
+  }
+
+  function setObsequio(valor){
+    incluyeObsequio = valor;
+    document.getElementById('obsequio-si').classList.toggle('selected', valor === true);
+    document.getElementById('obsequio-no').classList.toggle('selected', valor === false);
+    document.getElementById('sub-con-obsequio').style.display = valor ? 'block' : 'none';
+    document.getElementById('sub-sin-obsequio').style.display = valor ? 'none' : 'block';
+  }
+
+  function papeletasAsignadas(c){
+    return c.costaleros.reduce(function(sum, p){ return sum + cupoDe(p); }, 0);
+  }
+
+  function renderCampanas(){
+    var grid = document.getElementById('campanas-grid');
+    grid.innerHTML = '';
+    campanas.forEach(function(c, idx){
+      var pct = Math.min(100, Math.round((c.recaudado / c.objetivo) * 100));
+      var fechaLinea = c.tipo === 'rifa' ? ('Sorteo: ' + c.fechaSorteo) : ('Abierta hasta: ' + c.fecha);
+      var tipoLabel = c.tipo === 'rifa' ? 'Rifa autorizada' : (c.tieneObsequio === false ? 'Donativo sin obsequio' : 'Donativo con obsequio');
+
+      var lineaExtra;
+      if(c.totalPapeletas){
+        var asignadas = papeletasAsignadas(c);
+        lineaExtra = '<div class="meta"><span>' + asignadas + ' / ' + c.totalPapeletas + ' papeletas asignadas</span><span>' + c.costaleros.length + ' costaleros</span></div>';
+      } else {
+        lineaExtra = '<div class="meta"><span>Donativo sugerido: ' + (c.valorDonativo || '-') + ' €</span><span>' + c.costaleros.length + ' costaleros</span></div>';
+      }
+
+      var urlEntidad = 'cultum.app/entidad/' + c.codigoEntidad;
+      var enlaceEntidad = '<div class="link-cell" style="margin-top:10px;"><span class="link-text">' + urlEntidad + '</span><button class="btn-ghost btn-small" onclick="copiarEnlace(this, \'' + urlEntidad + '\')">Copiar</button><span class="copied">¡Copiado!</span></div>';
+
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        '<span class="badge-type ' + c.tipo + '">' + tipoLabel + '</span>' +
+        '<h3>' + c.entidad + '</h3>' +
+        '<p class="sub">' + c.titulo + '</p>' +
+        '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="meta"><span>' + c.recaudado + ' € / ' + c.objetivo + ' €</span><span>' + fechaLinea + '</span></div>' +
+        lineaExtra +
+        '<button class="btn-ghost btn-small" onclick="verCostaleros(' + idx + ')">Gestionar costaleros</button>' +
+        '<p class="note" style="margin:12px 0 2px;">Panel para el responsable de la entidad:</p>' +
+        enlaceEntidad;
+      grid.appendChild(card);
+    });
+  }
+
+  function crearCampana(){
+    var entidad = document.getElementById('f-entidad').value.trim() || 'Entidad sin nombre';
+    var titulo = document.getElementById('f-titulo').value.trim() || 'Campaña sin título';
+
+    if(tipoSeleccionado === 'rifa' && !document.getElementById('f-legal-check').checked){
+      alert('Para crear una rifa autorizada, primero confirma que la entidad tiene la autorización y la fianza en regla.');
+      return;
+    }
+
+    var nueva = {id:'c' + Date.now(), tipo: tipoSeleccionado, entidad: entidad, titulo: titulo, recaudado: 0, siguienteNumero: 1, costaleros: [], codigoEntidad: Math.random().toString(36).substring(2, 8)};
+
+    if(tipoSeleccionado === 'rifa'){
+      var precioRifa = parseFloat(document.getElementById('f-precio-rifa').value) || 3;
+      var totalRifa = parseInt(document.getElementById('f-total-papeletas-rifa').value) || 500;
+      nueva.precio = precioRifa;
+      nueva.totalPapeletas = totalRifa;
+      nueva.premio = document.getElementById('f-premio').value.trim() || 'Premio por definir';
+      nueva.fechaSorteo = document.getElementById('f-fecha-sorteo').value.trim() || 'por confirmar';
+      nueva.objetivo = totalRifa * precioRifa;
+    } else {
+      nueva.tieneObsequio = incluyeObsequio;
+      nueva.fecha = document.getElementById('f-fecha').value.trim() || 'por confirmar';
+      nueva.objetivo = parseFloat(document.getElementById('f-objetivo').value) || 1000;
+      if(incluyeObsequio){
+        var precio = parseFloat(document.getElementById('f-precio').value) || 2;
+        var totalPapeletas = parseInt(document.getElementById('f-total-papeletas').value) || 1000;
+        nueva.precio = precio;
+        nueva.totalPapeletas = totalPapeletas;
+        nueva.obsequio = document.getElementById('f-obsequio').value.trim() || 'Obsequio';
+        if(!document.getElementById('f-objetivo').value){ nueva.objetivo = totalPapeletas * precio; }
+      } else {
+        nueva.valorDonativo = parseFloat(document.getElementById('f-valor-donativo').value) || 20;
+      }
+    }
+
+    campanas.push(nueva);
+
+    ['f-entidad','f-titulo','f-desc','f-obsequio','f-precio','f-objetivo','f-fecha','f-total-papeletas','f-premio','f-fecha-sorteo','f-precio-rifa','f-total-papeletas-rifa','f-valor-donativo'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('f-legal-check').checked = false;
+    setTipo('donativo');
+    setObsequio(true);
+    toggleForm();
+    renderCampanas();
+  }
+
+  function verCostaleros(idx){
+    vistaActual = idx;
+    var c = campanas[idx];
+    document.getElementById('cv-titulo').textContent = 'Costaleros · ' + c.entidad;
+    document.getElementById('c-cupo-row').style.display = esSinPapeletas(c) ? 'none' : 'grid';
+    document.getElementById('donativos-section').style.display = esSinPapeletas(c) ? 'block' : 'none';
+    renderCostalerosHead();
+    renderCostaleros();
+    if(esSinPapeletas(c)){ cargarDonativosCampana(); }
+    document.getElementById('costalero-view').classList.add('open');
+    document.getElementById('costalero-view').scrollIntoView({behavior:'smooth'});
+  }
+
+  function renderCostalerosHead(){
+    var c = campanas[vistaActual];
+    var head = document.getElementById('costaleros-head');
+    head.innerHTML = esSinPapeletas(c)
+      ? '<tr><th>Nombre</th><th>Teléfono</th><th>Enlace</th></tr>'
+      : '<tr><th>Nombre</th><th>Teléfono</th><th>Números</th><th>Cupo</th><th>Enlace</th></tr>';
+  }
+
+  function cerrarCostaleros(){
+    document.getElementById('costalero-view').classList.remove('open');
+    vistaActual = null;
+  }
+
+  function renderCostaleros(){
+    var c = campanas[vistaActual];
+    var body = document.getElementById('costaleros-body');
+    body.innerHTML = '';
+    var sinPap = esSinPapeletas(c);
+    c.costaleros.forEach(function(p, pIdx){
+      var tr = document.createElement('tr');
+      var url = 'cultum.app/costalero/' + p.codigo;
+      var linkCell = '<div class="link-cell"><span class="link-text">' + url + '</span><button class="btn-ghost btn-small" onclick="copiarEnlace(this, \'' + url + '\')">Copiar</button><span class="copied">¡Copiado!</span></div>';
+      if(sinPap){
+        tr.innerHTML = '<td>' + p.nombre + '</td><td>' + p.telefono + '</td><td>' + linkCell + '</td>';
+      } else {
+        var rango = p.bloques.map(function(b){
+          return String(b.inicio).padStart(4,'0') + '–' + String(b.fin).padStart(4,'0');
+        }).join(', ');
+        tr.innerHTML =
+          '<td>' + p.nombre + '</td>' +
+          '<td>' + p.telefono + '</td>' +
+          '<td>' + rango + '</td>' +
+          '<td><div class="cupo-cell"><span>' + cupoDe(p) + '</span><button class="btn-ghost btn-small" onclick="ampliarCupo(' + pIdx + ')">+10</button></div></td>' +
+          '<td>' + linkCell + '</td>';
+      }
+      body.appendChild(tr);
+    });
+  }
+
+  async function cargarDonativosCampana(){
+    var c = campanas[vistaActual];
+    var box = document.getElementById('donativos-list');
+    box.innerHTML = '<p class="note" style="margin:0;">Cargando…</p>';
+    var todos = [];
+    for(var i = 0; i < c.costaleros.length; i++){
+      var p = c.costaleros[i];
+      try{
+        var res = await window.storage.get('costalero:' + p.codigo + ':donativos', true);
+        var lista = res ? JSON.parse(res.value) : [];
+        lista.forEach(function(d){ d._codigo = p.codigo; d._costalero = p.nombre; });
+        todos = todos.concat(lista);
+      } catch(e){ /* sin donativos todavía para este costalero */ }
+    }
+    if(todos.length === 0){
+      box.innerHTML = '<p class="note" style="margin:0;">Todavía no hay donativos registrados.</p>';
+      return;
+    }
+    box.innerHTML = '';
+    todos.reverse().forEach(function(d){
+      var row = document.createElement('div');
+      row.className = 'sale-row';
+      var pendiente = d.metodo === 'efectivo' && d.estado === 'pendiente';
+      row.innerHTML =
+        '<div><h4 style="margin:0; font-size:14px;">' + d.donanteNombre + ' · ' + d.monto + ' €</h4>' +
+        '<p style="margin:2px 0 0; font-size:12px; color:var(--muted);">Costalero: ' + d._costalero + ' · ' + (d.metodo === 'bizum' ? 'Bizum' : 'Efectivo') + '</p></div>' +
+        (pendiente
+          ? '<button class="btn-ghost btn-small" onclick="confirmarCobro(\'' + d._codigo + '\',\'' + d.id + '\')">Confirmar cobro</button>'
+          : '<span class="badge-type donativo">Cobrado</span>');
+      box.appendChild(row);
+    });
+  }
+
+  async function confirmarCobro(codigo, donativoId){
+    try{
+      var res = await window.storage.get('costalero:' + codigo + ':donativos', true);
+      var lista = res ? JSON.parse(res.value) : [];
+      lista.forEach(function(d){ if(d.id === donativoId){ d.estado = 'cobrado'; } });
+      await window.storage.set('costalero:' + codigo + ':donativos', JSON.stringify(lista), true);
+      cargarDonativosCampana();
+    } catch(e){
+      alert('No se pudo actualizar el donativo. Inténtalo de nuevo.');
+    }
+  }
+
+  function ampliarCupo(pIdx){
+    var c = campanas[vistaActual];
+    var p = c.costaleros[pIdx];
+    var asignadas = papeletasAsignadas(c);
+    if(c.totalPapeletas && asignadas + 10 > c.totalPapeletas){
+      alert('No quedan 10 papeletas libres en esta campaña (solo ' + (c.totalPapeletas - asignadas) + ' sin asignar). Aumenta primero el total de papeletas de la campaña.');
+      return;
+    }
+    var inicio = c.siguienteNumero;
+    var fin = inicio + 9;
+    p.bloques.push({inicio: inicio, fin: fin});
+    c.siguienteNumero = fin + 1;
+    renderCostaleros();
+    renderCampanas();
+  }
+
+  function copiarEnlace(btn, url){
+    var full = 'https://' + url;
+    if(navigator.clipboard){ navigator.clipboard.writeText(full).catch(function(){}); }
+    var fb = btn.nextElementSibling;
+    fb.style.display = 'inline';
+    setTimeout(function(){ fb.style.display = 'none'; }, 1500);
+  }
+
+  function anadirCostalero(){
+    var c = campanas[vistaActual];
+    var nombre = document.getElementById('c-nombre').value.trim();
+    var telefono = document.getElementById('c-telefono').value.trim();
+    if(!nombre || !telefono){ return; }
+    var codigo = Math.random().toString(36).substring(2, 7);
+
+    if(esSinPapeletas(c)){
+      c.costaleros.push({nombre: nombre, telefono: telefono, codigo: codigo});
+      document.getElementById('c-nombre').value = '';
+      document.getElementById('c-telefono').value = '';
+      renderCostaleros();
+      renderCampanas();
+      return;
+    }
+
+    var cupo = parseInt(document.getElementById('c-cupo').value) || 10;
+    var errBox = document.getElementById('c-cupo-err');
+    var yaAsignadas = papeletasAsignadas(c);
+    if(c.totalPapeletas && yaAsignadas + cupo > c.totalPapeletas){
+      errBox.textContent = 'Solo quedan ' + (c.totalPapeletas - yaAsignadas) + ' papeletas sin asignar en esta campaña.';
+      errBox.style.display = 'block';
+      return;
+    }
+    errBox.style.display = 'none';
+
+    var inicio = c.siguienteNumero;
+    var fin = inicio + cupo - 1;
+    c.siguienteNumero = fin + 1;
+    c.costaleros.push({nombre: nombre, telefono: telefono, codigo: codigo, bloques:[{inicio: inicio, fin: fin}]});
+    document.getElementById('c-nombre').value = '';
+    document.getElementById('c-telefono').value = '';
+    document.getElementById('c-cupo').value = '';
+    renderCostaleros();
+    renderCampanas();
+  }
+
+  renderCampanas();
+</script>
+</body>
+</html>

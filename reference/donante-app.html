@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tu donativo — prototipo</title>
+<style>
+  :root{
+    --cream:#F6EFE3; --paper:#FFFBF3; --burgundy:#5B1220; --burgundy-dark:#3E0C16;
+    --gold:#B8862F; --gold-light:#E9D6A8; --ink:#2A211C; --muted:#8A7B6C; --line:#E4D8C4; --ok:#4B6C4C;
+    --font-display: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:#EDE6D8; font-family:var(--font-body); display:flex; justify-content:center; padding:24px 0;}
+  .device{width:380px; background:var(--cream); border-radius:28px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.18); position:relative; min-height:700px; display:flex; flex-direction:column;}
+  .statusbar{display:flex; justify-content:space-between; padding:10px 20px 2px; font-size:12px; color:var(--ink); font-weight:600;}
+  .content{flex:1; overflow-y:auto; padding:0 20px 20px; display:flex; flex-direction:column;}
+  .app-header{padding:14px 2px 12px;}
+  .app-header h1{font-family:var(--font-display); font-size:21px; font-weight:normal; color:var(--burgundy); margin:0;}
+  .app-header p{margin:2px 0 0; font-size:13px; color:var(--muted);}
+
+  .amount-card{background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:24px; text-align:center; margin:18px 0;}
+  .amount-card p{margin:0 0 6px; font-size:13px; color:var(--muted);}
+  .amount-card .amount{font-family:var(--font-display); font-size:38px; color:var(--burgundy);}
+  .amount-card .persona{font-size:13px; color:var(--ink); margin-top:6px;}
+
+  .pay-option{display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:10px; cursor:pointer;}
+  .pay-option.selected{border-color:var(--burgundy); background:var(--gold-light);}
+  .pay-dot{width:18px; height:18px; border-radius:50%; border:2px solid var(--muted); flex-shrink:0;}
+  .pay-option.selected .pay-dot{border-color:var(--burgundy); background:var(--burgundy);}
+
+  .primary-btn{background:var(--burgundy); color:var(--gold-light); border:none; border-radius:12px; padding:14px; font-size:15px; font-weight:600; width:100%; cursor:pointer; font-family:var(--font-body); margin-top:8px;}
+  .primary-btn:disabled{opacity:0.5; cursor:default;}
+
+  .status-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px 0;}
+  .seal{width:76px; height:76px; border-radius:50%; border:3px solid var(--gold); display:flex; align-items:center; justify-content:center; margin-bottom:16px;}
+  .seal svg{width:34px; height:34px; stroke:var(--burgundy);}
+  .status-wrap h2{font-family:var(--font-display); font-size:21px; color:var(--burgundy); margin:0 0 8px;}
+  .status-wrap p{color:var(--muted); font-size:14px; margin:0; max-width:260px;}
+
+  .note{font-size:12px; color:var(--muted); text-align:center; margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span>9:41</span><span>Sevilla · 4G</span></div>
+  <div class="content">
+    <div class="app-header">
+      <h1>Hdad. de la O</h1>
+      <p>Donativo pro caridad</p>
+    </div>
+
+    <div id="cuerpo"><p class="note">Cargando…</p></div>
+  </div>
+</div>
+
+<script>
+  var MI_CODIGO = 'na4d1';
+  var MI_NOMBRE = 'Manuela Ríos';
+  var IMPORTE = 20;
+  var payMethod = 'bizum';
+
+  async function cargarEstado(){
+    var cuerpo = document.getElementById('cuerpo');
+    var estado = null, metodo = null;
+    try{
+      var res = await window.storage.get('costalero:' + MI_CODIGO + ':donativos', true);
+      var lista = res ? JSON.parse(res.value) : [];
+      if(lista.length > 0){ estado = lista[0].estado; metodo = lista[0].metodo; }
+    } catch(e){ /* aún no hay nada registrado */ }
+
+    if(estado === 'cobrado'){
+      cuerpo.innerHTML =
+        '<div class="status-wrap">' +
+        '<div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>' +
+        '<h2>¡Gracias, ' + MI_NOMBRE.split(' ')[0] + '!</h2>' +
+        '<p>Tu donativo de ' + IMPORTE + ' € está confirmado.</p>' +
+        '</div>';
+      return;
+    }
+
+    if(estado === 'pendiente'){
+      cuerpo.innerHTML =
+        '<div class="status-wrap">' +
+        '<div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 8v5"/><circle cx="12" cy="16.5" r="0.5"/><circle cx="12" cy="12" r="9"/></svg></div>' +
+        '<h2>Pendiente de confirmar</h2>' +
+        '<p>Registraste tu donativo de ' + IMPORTE + ' € en efectivo. En cuanto la hermandad lo confirme, aparecerá aquí como pagado.</p>' +
+        '<button class="primary-btn" style="margin-top:20px;" onclick="cargarEstado()">Actualizar</button>' +
+        '</div>';
+      return;
+    }
+
+    cuerpo.innerHTML =
+      '<div class="amount-card">' +
+      '<p>Tu donativo</p>' +
+      '<div class="amount">' + IMPORTE + ' €</div>' +
+      '<div class="persona">' + MI_NOMBRE + '</div>' +
+      '</div>' +
+      '<div class="pay-option selected" id="pay-bizum" onclick="selectPay(\'bizum\')"><div class="pay-dot"></div><span>Bizum</span></div>' +
+      '<div class="pay-option" id="pay-tarjeta" onclick="selectPay(\'tarjeta\')"><div class="pay-dot"></div><span>Tarjeta</span></div>' +
+      '<div class="pay-option" id="pay-efectivo" onclick="selectPay(\'efectivo\')"><div class="pay-dot"></div><span>Efectivo</span></div>' +
+      '<button class="primary-btn" id="pagar-btn" onclick="pagar()">Pagar ' + IMPORTE + ' €</button>';
+  }
+
+  function selectPay(m){
+    payMethod = m;
+    ['bizum','tarjeta','efectivo'].forEach(function(k){
+      document.getElementById('pay-' + k).classList.toggle('selected', k === m);
+    });
+  }
+
+  async function pagar(){
+    var btn = document.getElementById('pagar-btn');
+    btn.disabled = true; btn.textContent = 'Procesando…';
+    try{
+      var entrada = {
+        id: 'd' + Date.now(),
+        donanteNombre: MI_NOMBRE, donanteTelefono: '',
+        monto: IMPORTE, metodo: payMethod,
+        estado: (payMethod === 'bizum' || payMethod === 'tarjeta') ? 'cobrado' : 'pendiente'
+      };
+      await window.storage.set('costalero:' + MI_CODIGO + ':donativos', JSON.stringify([entrada]), true);
+      cargarEstado();
+    } catch(e){
+      alert('No se pudo procesar el pago. Inténtalo de nuevo.');
+      btn.disabled = false; btn.textContent = 'Pagar ' + IMPORTE + ' €';
+    }
+  }
+
+  cargarEstado();
+</script>
+</body>
+</html>

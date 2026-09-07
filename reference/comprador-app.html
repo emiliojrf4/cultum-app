@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colaborar — prototipo comprador</title>
+<style>
+  :root{
+    --cream:#F6EFE3; --paper:#FFFBF3; --burgundy:#5B1220; --burgundy-dark:#3E0C16;
+    --gold:#B8862F; --gold-light:#E9D6A8; --ink:#2A211C; --muted:#8A7B6C; --line:#E4D8C4; --ok:#4B6C4C;
+    --font-display: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:#EDE6D8; font-family:var(--font-body); display:flex; justify-content:center; padding:24px 0;}
+  .device{width:380px; background:var(--cream); border-radius:28px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.18); position:relative; min-height:700px; display:flex; flex-direction:column;}
+  .statusbar{display:flex; justify-content:space-between; padding:10px 20px 2px; font-size:12px; color:var(--ink); font-weight:600;}
+  .screen{display:none; flex-direction:column; flex:1; min-height:0;}
+  .screen.active{display:flex;}
+  .content{flex:1; overflow-y:auto; padding:0 18px 18px;}
+  .app-header{padding:14px 18px 12px; display:flex; align-items:center; gap:12px;}
+  .app-header h1{font-family:var(--font-display); font-size:21px; font-weight:normal; color:var(--burgundy); margin:0;}
+  .back-btn{width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .back-btn svg{width:16px; height:16px; stroke:var(--ink);}
+  .section-title{font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin:18px 0 10px;}
+
+  .camp-card{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; cursor:pointer;}
+  .camp-card:active{background:var(--gold-light);}
+  .camp-top{display:flex; gap:12px;}
+  .camp-thumb{width:56px; height:56px; border-radius:10px; background:var(--burgundy); flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--gold-light); font-family:var(--font-display); font-size:20px;}
+  .camp-info h3{margin:0 0 2px; font-size:15px; color:var(--ink); font-weight:600;}
+  .camp-info p{margin:0; font-size:13px; color:var(--muted);}
+  .camp-meta{display:flex; justify-content:space-between; margin-top:10px; font-size:12px; color:var(--muted);}
+  .progress-track{height:5px; border-radius:4px; background:var(--line); margin-top:8px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--gold);}
+
+  .hero-block{height:150px; border-radius:14px; background:linear-gradient(180deg, var(--burgundy), var(--burgundy-dark)); display:flex; align-items:flex-end; padding:14px; margin-bottom:14px;}
+  .hero-block span{color:var(--gold-light); font-family:var(--font-display); font-size:20px;}
+  .obsequio-box{display:flex; gap:12px; align-items:center; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px; margin:12px 0;}
+  .obsequio-icon{width:44px; height:44px; border-radius:10px; background:var(--gold-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .obsequio-icon svg{width:22px; height:22px; stroke:var(--burgundy);}
+  .obsequio-box p{margin:0; font-size:12px; color:var(--muted);}
+  .obsequio-box h4{margin:2px 0 0; font-size:14px; color:var(--ink);}
+
+  .price-row{display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin:6px 0;}
+  .price-row .price{font-size:22px; color:var(--burgundy); font-weight:600;}
+  .stepper{display:flex; align-items:center; gap:14px;}
+  .stepper button{width:34px; height:34px; border-radius:50%; border:1px solid var(--burgundy); background:var(--paper); color:var(--burgundy); font-size:18px; cursor:pointer;}
+  .stepper span{min-width:20px; text-align:center; font-size:16px; font-weight:600;}
+  .detail-desc{font-size:14px; color:var(--ink); line-height:1.6; margin:12px 0;}
+  .detail-fact{display:flex; justify-content:space-between; font-size:13px; padding:8px 0; border-bottom:1px solid var(--line); color:var(--muted);}
+  .detail-fact b{color:var(--ink); font-weight:600;}
+
+  .primary-btn{background:var(--burgundy); color:var(--gold-light); border:none; border-radius:12px; padding:14px; font-size:15px; font-weight:600; width:100%; cursor:pointer; font-family:var(--font-body);}
+  .primary-btn:active{background:var(--burgundy-dark);}
+  .secondary-btn{background:transparent; color:var(--burgundy); border:1px solid var(--burgundy); border-radius:12px; padding:13px; font-size:15px; font-weight:600; width:100%; cursor:pointer; margin-top:10px;}
+  .footer-fixed{padding:14px 18px 18px; border-top:1px solid var(--line); background:var(--cream);}
+
+  .pay-option{display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:10px; cursor:pointer;}
+  .pay-option.selected{border-color:var(--burgundy); background:var(--gold-light);}
+  .pay-dot{width:18px; height:18px; border-radius:50%; border:2px solid var(--muted); flex-shrink:0;}
+  .pay-option.selected .pay-dot{border-color:var(--burgundy); background:var(--burgundy);}
+  .summary-row{display:flex; justify-content:space-between; font-size:14px; padding:6px 0; color:var(--ink);}
+  .summary-row.total{font-weight:700; font-size:16px; border-top:1px solid var(--line); margin-top:8px; padding-top:12px;}
+
+  .confirm-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;}
+  .seal{width:76px; height:76px; border-radius:50%; border:3px solid var(--gold); display:flex; align-items:center; justify-content:center; margin-bottom:16px;}
+  .seal svg{width:34px; height:34px; stroke:var(--burgundy);}
+  .confirm-wrap h2{font-family:var(--font-display); font-size:22px; color:var(--burgundy); margin:0 0 6px; text-align:center;}
+  .confirm-wrap p{color:var(--muted); font-size:14px; text-align:center; margin:0 0 20px;}
+  .ticket{width:100%; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:0; margin-bottom:20px; position:relative; overflow:hidden;}
+  .ticket-top{padding:16px; display:flex; justify-content:space-between; align-items:center;}
+  .ticket-top div p{margin:0; font-size:12px; color:var(--muted);}
+  .ticket-top div h4{margin:2px 0 0; font-size:15px; color:var(--ink);}
+  .ticket-nums{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:150px;}
+  .num-chip{background:var(--burgundy); color:var(--gold-light); font-family:var(--font-display); font-size:12.5px; border-radius:14px; padding:5px 11px; white-space:nowrap;}
+  .ticket-divider{border-top:1px dashed var(--line); margin:0 16px;}
+  .ticket-bottom{padding:12px 16px 16px; font-size:12px; color:var(--muted);}
+
+  .tab-item{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 0; cursor:pointer; color:var(--muted); font-size:11px;}
+  .tab-item.active{color:var(--burgundy);}
+  .tab-item svg{width:20px; height:20px; stroke:currentColor;}
+  .tabbar{display:flex; border-top:1px solid var(--line); background:var(--paper);}
+
+  .my-ticket{background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px;}
+  .badge{font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600;}
+  .badge.pending{background:var(--gold-light); color:var(--burgundy-dark);}
+  .badge.done{background:var(--ok); color:var(--paper);}
+  .badge.won{background:var(--burgundy); color:var(--gold-light);}
+  .badge.lost{background:#EFEAE1; color:var(--muted);}
+  .badge-type{display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; padding:2px 7px; border-radius:5px; margin-bottom:6px;}
+  .badge-type.donativo{background:var(--gold-light); color:var(--burgundy-dark);}
+  .badge-type.rifa{background:var(--burgundy); color:var(--gold-light);}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span>9:41</span><span>Sevilla · 4G</span></div>
+
+  <!-- HOME -->
+  <div class="screen active" id="home">
+    <div class="app-header"><h1>Colaborar</h1></div>
+    <div class="content">
+      <div class="section-title">Campañas de colaboración activas</div>
+
+      <div class="camp-card" onclick="openDetail('esperanza')">
+        <span class="badge-type donativo">Donativo</span>
+        <div class="camp-top">
+          <div class="camp-thumb">E</div>
+          <div class="camp-info"><h3>Hdad. de la Esperanza</h3><p>Restauración de la Cruz de Mayo</p></div>
+        </div>
+        <div class="camp-meta"><span>Donativo desde 2 €</span><span>3.200 € / 5.000 €</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:64%"></div></div>
+      </div>
+
+      <div class="camp-card" onclick="openDetail('silencio')">
+        <span class="badge-type rifa">Rifa autorizada</span>
+        <div class="camp-top">
+          <div class="camp-thumb">S</div>
+          <div class="camp-info"><h3>Hdad. del Silencio</h3><p>Sorteo pro cera de Cuaresma</p></div>
+        </div>
+        <div class="camp-meta"><span>Papeleta desde 3 €</span><span>800 € / 2.000 €</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:40%"></div></div>
+      </div>
+
+      <div class="camp-card" onclick="openDetail('trinidad')">
+        <span class="badge-type donativo">Donativo</span>
+        <div class="camp-top">
+          <div class="camp-thumb">T</div>
+          <div class="camp-info"><h3>Hdad. de la Trinidad</h3><p>Restauración del paso de misterio</p></div>
+        </div>
+        <div class="camp-meta"><span>Donativo desde 1 €</span><span>450 € / 3.000 €</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:15%"></div></div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tab-item active" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"/></svg>Inicio</div>
+      <div class="tab-item" onclick="nav('tickets')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z"/></svg>Mis colaboraciones</div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="screen" id="detail">
+    <div class="app-header"><div class="back-btn" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div><h1 id="d-hermandad">Hermandad</h1></div>
+    <div class="content">
+      <div class="hero-block"><span id="d-titulo">Campaña</span></div>
+      <p class="detail-desc" id="d-desc">Descripción de la campaña.</p>
+
+      <div class="obsequio-box" id="obsequio-box">
+        <div class="obsequio-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 7h-3.17A3 3 0 1012 5.17 3 3 0 007.17 7H4v4h16z"/><path d="M12 11v10"/><path d="M20 11v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7"/></svg></div>
+        <div><p>Obsequio por tu colaboración</p><h4 id="d-obsequio">Pulsera bordada</h4></div>
+      </div>
+
+      <div class="obsequio-box" id="premio-box" style="display:none;">
+        <div class="obsequio-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v4a5 5 0 01-10 0V4z"/><path d="M7 5H4a3 3 0 003 3"/><path d="M17 5h3a3 3 0 01-3 3"/></svg></div>
+        <div><p>Premio del sorteo</p><h4 id="d-premio">Estancia de fin de semana</h4></div>
+      </div>
+
+      <div class="detail-fact"><span id="d-precio-label">Donativo por papeleta</span><b id="d-precio-fact">2 €</b></div>
+      <div class="detail-fact"><span>Recaudado hasta ahora</span><b id="d-recaudado">3.200 € / 5.000 €</b></div>
+      <div class="detail-fact"><span id="d-fecha-label">Campaña abierta hasta</span><b id="d-fecha">15 de junio</b></div>
+    </div>
+    <div class="footer-fixed">
+      <div class="price-row">
+        <div class="stepper">
+          <button onclick="changeQty(-1)">–</button>
+          <span id="qty">1</span>
+          <button onclick="changeQty(1)">+</button>
+        </div>
+        <span class="price" id="total-price">2 €</span>
+      </div>
+      <button class="primary-btn" id="detail-cta" onclick="nav('checkout'); fillCheckout();">Colaborar</button>
+    </div>
+  </div>
+
+  <!-- CHECKOUT -->
+  <div class="screen" id="checkout">
+    <div class="app-header"><div class="back-btn" onclick="nav('detail')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div><h1>Tu donativo</h1></div>
+    <div class="content">
+      <div class="section-title">Resumen</div>
+      <div class="summary-row"><span id="c-hermandad">Hermandad</span><span id="c-cantidad">1 papeleta</span></div>
+      <div class="summary-row total"><span>Total del donativo</span><span id="c-total">2 €</span></div>
+
+      <div class="section-title">Método de pago</div>
+      <div class="pay-option selected" id="pay-bizum" onclick="selectPay('bizum')"><div class="pay-dot"></div><span>Bizum</span></div>
+      <div class="pay-option" id="pay-tarjeta" onclick="selectPay('tarjeta')"><div class="pay-dot"></div><span>Tarjeta</span></div>
+    </div>
+    <div class="footer-fixed">
+      <button class="primary-btn" onclick="nav('confirm'); fillConfirm();">Donar <span id="pay-total">2 €</span></button>
+    </div>
+  </div>
+
+  <!-- CONFIRM -->
+  <div class="screen" id="confirm">
+    <div class="confirm-wrap">
+      <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h2 id="cf-titulo">¡Gracias por tu colaboración!</h2>
+      <p id="cf-subtitulo">Esta es tu papeleta de colaboración digital. Guárdala para recoger tu obsequio.</p>
+      <div class="ticket">
+        <div class="ticket-top">
+          <div><p>Entidad</p><h4 id="cf-hermandad">Esperanza</h4></div>
+          <div class="ticket-nums" id="cf-nums"></div>
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-bottom"><span id="cf-cantidad">1 papeleta</span> · <span id="cf-obsequio">Pulsera bordada</span></div>
+      </div>
+      <button class="primary-btn" onclick="nav('tickets')">Ver mis colaboraciones</button>
+      <button class="secondary-btn" onclick="nav('home')">Volver al inicio</button>
+    </div>
+  </div>
+
+  <!-- TICKETS -->
+  <div class="screen" id="tickets">
+    <div class="app-header"><h1>Mis colaboraciones</h1></div>
+    <div class="content">
+      <div class="section-title">Donativos</div>
+      <div class="my-ticket">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><h4 style="margin:0; font-size:15px;">Hdad. de la Esperanza</h4><p style="margin:2px 0 0; font-size:12px; color:var(--muted);">Papeleta nº 0472 · Pulsera bordada</p></div>
+          <span class="badge pending">Obsequio pendiente</span>
+        </div>
+      </div>
+      <div class="my-ticket">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><h4 style="margin:0; font-size:15px;">Hdad. de la Trinidad</h4><p style="margin:2px 0 0; font-size:12px; color:var(--muted);">Papeleta nº 0885 · Estampa conmemorativa</p></div>
+          <span class="badge done">Obsequio entregado</span>
+        </div>
+      </div>
+
+      <div class="section-title">Rifas</div>
+      <div class="my-ticket">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><h4 style="margin:0; font-size:15px;">Hdad. del Silencio</h4><p style="margin:2px 0 0; font-size:12px; color:var(--muted);">Papeleta nº 0231 · Sorteo: 10 de mayo</p></div>
+          <span class="badge pending">Pendiente de sorteo</span>
+        </div>
+      </div>
+      <div class="my-ticket">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><h4 style="margin:0; font-size:15px;">Hdad. de la O</h4><p style="margin:2px 0 0; font-size:12px; color:var(--muted);">Papeleta nº 0119</p></div>
+          <span class="badge won">¡Premiada!</span>
+        </div>
+      </div>
+      <div class="my-ticket">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><h4 style="margin:0; font-size:15px;">Hdad. del Gran Poder</h4><p style="margin:2px 0 0; font-size:12px; color:var(--muted);">Papeleta nº 0640</p></div>
+          <span class="badge lost">No premiada</span>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <div class="tab-item" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"/></svg>Inicio</div>
+      <div class="tab-item active" onclick="nav('tickets')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z"/></svg>Mis colaboraciones</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var campañas = {
+    esperanza: {tipo:'donativo', nombre:'Hdad. de la Esperanza', titulo:'Cruz de Mayo', desc:'Donativo para la restauración de la Cruz de Mayo de la hermandad. Cada colaboración incluye una pulsera bordada con el escudo, de recuerdo.', obsequio:'Pulsera bordada', precio:2, recaudado:'3.200 € / 5.000 €', fecha:'15 de junio'},
+    silencio: {tipo:'rifa', nombre:'Hdad. del Silencio', titulo:'Sorteo pro cera de Cuaresma', desc:'Rifa autorizada para sufragar la cera de la próxima estación de penitencia. El sorteo se celebra públicamente en la casa hermandad.', premio:'Estancia de fin de semana', precio:3, recaudado:'800 € / 2.000 €', fechaSorteo:'10 de mayo'},
+    trinidad: {tipo:'donativo', nombre:'Hdad. de la Trinidad', titulo:'Restauración del paso', desc:'Donativo para restaurar el paso de misterio, dañado por la humedad. Incluye una estampa conmemorativa.', obsequio:'Estampa conmemorativa', precio:1, recaudado:'450 € / 3.000 €', fecha:'27 de mayo'}
+  };
+  var current = 'esperanza';
+  var qty = 1;
+
+  function nav(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    document.getElementById(id).classList.add('active');
+  }
+
+  function openDetail(id){
+    current = id; qty = 1;
+    var c = campañas[id];
+    var esRifa = c.tipo === 'rifa';
+    document.getElementById('d-hermandad').textContent = c.nombre;
+    document.getElementById('d-titulo').textContent = c.titulo;
+    document.getElementById('d-desc').textContent = c.desc;
+    document.getElementById('d-precio-fact').textContent = c.precio + ' €';
+    document.getElementById('d-recaudado').textContent = c.recaudado;
+
+    document.getElementById('obsequio-box').style.display = esRifa ? 'none' : 'flex';
+    document.getElementById('premio-box').style.display = esRifa ? 'flex' : 'none';
+    document.getElementById('d-precio-label').textContent = esRifa ? 'Precio por papeleta' : 'Donativo por papeleta';
+    document.getElementById('d-fecha-label').textContent = esRifa ? 'Fecha del sorteo' : 'Campaña abierta hasta';
+    document.getElementById('d-fecha').textContent = esRifa ? c.fechaSorteo : c.fecha;
+    document.getElementById('detail-cta').textContent = esRifa ? 'Comprar papeleta' : 'Colaborar';
+    if(esRifa){ document.getElementById('d-premio').textContent = c.premio; }
+    else { document.getElementById('d-obsequio').textContent = c.obsequio; }
+
+    document.getElementById('qty').textContent = qty;
+    document.getElementById('total-price').textContent = (qty * c.precio) + ' €';
+    nav('detail');
+  }
+
+  function changeQty(delta){
+    qty = Math.max(1, Math.min(20, qty + delta));
+    document.getElementById('qty').textContent = qty;
+    document.getElementById('total-price').textContent = (qty * campañas[current].precio) + ' €';
+  }
+
+  function selectPay(method){
+    document.getElementById('pay-bizum').classList.toggle('selected', method === 'bizum');
+    document.getElementById('pay-tarjeta').classList.toggle('selected', method === 'tarjeta');
+  }
+
+  function fillCheckout(){
+    var c = campañas[current];
+    var total = qty * c.precio;
+    document.getElementById('c-hermandad').textContent = c.nombre;
+    document.getElementById('c-cantidad').textContent = qty + (qty === 1 ? ' papeleta' : ' papeletas');
+    document.getElementById('c-total').textContent = total + ' €';
+    document.getElementById('pay-total').textContent = total + ' €';
+  }
+
+  function fillConfirm(){
+    var c = campañas[current];
+    var esRifa = c.tipo === 'rifa';
+    document.getElementById('cf-hermandad').textContent = c.nombre;
+
+    var nums = [];
+    var base = Math.floor(Math.random()*800)+100;
+    for(var i = 0; i < qty; i++){ nums.push(String(base + i).padStart(4,'0')); }
+    var numsBox = document.getElementById('cf-nums');
+    numsBox.innerHTML = '';
+    nums.forEach(function(n){
+      var chip = document.createElement('span');
+      chip.className = 'num-chip';
+      chip.textContent = n;
+      numsBox.appendChild(chip);
+    });
+
+    document.getElementById('cf-cantidad').textContent = qty + (qty === 1 ? ' papeleta' : ' papeletas');
+    document.getElementById('cf-titulo').textContent = esRifa ? '¡Ya tienes tu papeleta!' : '¡Gracias por tu colaboración!';
+    document.getElementById('cf-subtitulo').textContent = esRifa
+      ? 'Guarda estos números para el sorteo del ' + c.fechaSorteo + '.'
+      : 'Estas son tus papeletas de colaboración digitales. Guárdalas para recoger tu obsequio.';
+    document.getElementById('cf-obsequio').textContent = esRifa ? ('Sorteo: ' + c.fechaSorteo) : c.obsequio;
+  }
+</script>
+</body>
+</html>

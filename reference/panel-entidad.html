@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de la entidad — Cultum</title>
+<style>
+  :root{
+    --cream:#F6EFE3; --paper:#FFFBF3; --burgundy:#5B1220; --burgundy-dark:#3E0C16;
+    --gold:#B8862F; --gold-light:#E9D6A8; --ink:#2A211C; --muted:#8A7B6C; --line:#E4D8C4; --ok:#4B6C4C;
+    --font-display: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:#EDE6D8; font-family:var(--font-body); color:var(--ink);}
+  .topbar{background:var(--burgundy); color:var(--gold-light); padding:18px 32px;}
+  .topbar h1{font-family:var(--font-display); font-weight:normal; font-size:19px; margin:0;}
+  .topbar p{margin:2px 0 0; font-size:12.5px; color:var(--gold-light); opacity:0.85;}
+  .wrap{max-width:880px; margin:0 auto; padding:26px 24px 60px;}
+
+  .summary-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:26px;}
+  .summary-card{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px; text-align:center;}
+  .summary-card .num{font-size:22px; font-weight:700; color:var(--burgundy);}
+  .summary-card .lbl{font-size:11.5px; color:var(--muted); margin-top:4px;}
+  .progress-track{height:6px; border-radius:4px; background:var(--line); margin:-14px 0 26px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--gold);}
+
+  h2{font-family:var(--font-display); font-weight:normal; font-size:17px; color:var(--burgundy); margin:0 0 12px;}
+  table{width:100%; border-collapse:collapse; margin-bottom:30px; background:var(--paper); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.03em; color:var(--muted); padding:10px 12px; border-bottom:1px solid var(--line); background:#F1E8D6;}
+  td{font-size:13px; padding:10px 12px; border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .badge{font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600;}
+  .badge.pending{background:var(--gold-light); color:var(--burgundy-dark);}
+  .badge.done{background:var(--ok); color:var(--paper);}
+
+  .participants-block{margin-bottom:12px;}
+  .participants-block summary{cursor:pointer; font-size:13.5px; padding:10px 12px; background:var(--paper); border:1px solid var(--line); border-radius:8px; color:var(--ink);}
+  .participants-block summary b{color:var(--burgundy);}
+  .participants-block table{margin-top:8px; margin-bottom:0;}
+
+  .btn{background:var(--burgundy); color:var(--gold-light); border:none; border-radius:8px; padding:12px 20px; font-size:14px; font-weight:600; cursor:pointer; font-family:var(--font-body);}
+  .btn:hover{background:var(--burgundy-dark);}
+  .btn:disabled{opacity:0.5; cursor:default;}
+
+  .draw-box{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:20px;}
+  .winner-box{background:#F1E8D6; border:1px solid var(--gold); border-radius:12px; padding:18px; margin-top:16px;}
+  .winner-box h3{font-family:var(--font-display); font-weight:normal; color:var(--burgundy); margin:0 0 4px;}
+  .msg-log{margin-top:14px;}
+  .msg-item{background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:12.5px;}
+  .msg-item .tag{font-size:10.5px; font-weight:700; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:3px;}
+  .sim-note{font-size:11.5px; color:var(--muted); margin-top:10px; font-style:italic;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>Club Voleibol Triana</h1>
+  <p>Rifa pro nuevo equipamiento · panel del responsable</p>
+</div>
+
+<div class="wrap">
+  <div class="summary-grid">
+    <div class="summary-card"><div class="num">642 €</div><div class="lbl">Recaudado</div></div>
+    <div class="summary-card"><div class="num">300</div><div class="lbl">Papeletas totales</div></div>
+    <div class="summary-card"><div class="num">214</div><div class="lbl">Papeletas colocadas</div></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" style="width:71%"></div></div>
+
+  <h2>Personas que colocan papeletas</h2>
+  <table>
+    <thead><tr><th>Nombre</th><th>Cupo</th><th>Colocadas</th><th>Recaudado</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>Laura Gómez (madre de Vega)</td><td>100</td><td>82</td><td>246 €</td><td><span class="badge pending">18 sin colocar</span></td></tr>
+      <tr><td>Javier Ruiz (padre de Nico)</td><td>100</td><td>96</td><td>288 €</td><td><span class="badge pending">4 sin colocar</span></td></tr>
+      <tr><td>Marta Sánchez (jugadora, cadete)</td><td>100</td><td>36</td><td>108 €</td><td><span class="badge pending">64 sin colocar</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Participantes por persona</h2>
+
+  <details class="participants-block" open>
+    <summary><b>Laura Gómez</b> · 82 papeletas colocadas</summary>
+    <table>
+      <thead><tr><th>Participante</th><th>Teléfono</th><th>Números</th></tr></thead>
+      <tbody>
+        <tr><td>Ana Torres</td><td>600 111 111</td><td>0001–0002</td></tr>
+        <tr><td>Pedro León</td><td>600 222 222</td><td>0003</td></tr>
+        <tr><td>Isabel Vargas</td><td>600 333 333</td><td>0004–0006</td></tr>
+        <tr><td>(+ 76 participantes más)</td><td>—</td><td>0007–0082</td></tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details class="participants-block">
+    <summary><b>Javier Ruiz</b> · 96 papeletas colocadas</summary>
+    <table>
+      <thead><tr><th>Participante</th><th>Teléfono</th><th>Números</th></tr></thead>
+      <tbody>
+        <tr><td>Carmen Díaz</td><td>600 444 444</td><td>0101–0103</td></tr>
+        <tr><td>Rafael Soto</td><td>600 555 555</td><td>0104</td></tr>
+        <tr><td>(+ 92 participantes más)</td><td>—</td><td>0105–0196</td></tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details class="participants-block">
+    <summary><b>Marta Sánchez</b> · 36 papeletas colocadas</summary>
+    <table>
+      <thead><tr><th>Participante</th><th>Teléfono</th><th>Números</th></tr></thead>
+      <tbody>
+        <tr><td>Lucía Ferreiro</td><td>600 666 666</td><td>0201–0202</td></tr>
+        <tr><td>(+ 34 participantes más)</td><td>—</td><td>0203–0236</td></tr>
+      </tbody>
+    </table>
+  </details>
+
+  <h2 style="margin-top:30px;">Resultado del sorteo</h2>
+  <div class="draw-box">
+    <p style="margin:0 0 14px; font-size:13.5px; color:var(--muted);">Cultum no sortea ni elige al ganador. El sorteo lo hacéis vosotros por vuestro propio método (últimas cifras del sorteo de la ONCE/Lotería Nacional del día, bombo en acto público, etc.). Aquí solo introducís el número ya obtenido y os decimos quién lo tiene.</p>
+    <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+      <div>
+        <label style="display:block; font-size:12.5px; color:var(--muted); margin-bottom:5px;">Número ganador obtenido</label>
+        <input type="text" id="input-numero-ganador" placeholder="p. ej. 0047" style="border:1px solid var(--line); border-radius:8px; padding:10px; font-size:14px; width:160px;">
+      </div>
+      <button class="btn" onclick="buscarGanador()">Buscar participante</button>
+    </div>
+    <div id="resultado-sorteo"></div>
+  </div>
+</div>
+
+<script>
+  // Números realmente colocados en esta demo (los de las tablas de arriba, resumidos)
+  var numerosVendidos = [];
+  for(var i = 1; i <= 82; i++){ numerosVendidos.push({numero:i, nombre: i<=6 ? ['Ana Torres','Ana Torres','Pedro León','Isabel Vargas','Isabel Vargas','Isabel Vargas'][i-1] : 'Participante ' + i, telefono: i<=6 ? ['600111111','600111111','600222222','600333333','600333333','600333333'][i-1] : '600' + (100000+i)}); }
+  for(var j = 101; j <= 196; j++){ numerosVendidos.push({numero:j, nombre: j<=104 ? ['Carmen Díaz','Carmen Díaz','Carmen Díaz','Rafael Soto'][j-101] : 'Participante ' + j, telefono: j<=104 ? ['600444444','600444444','600444444','600555555'][j-101] : '600' + (200000+j)}); }
+  for(var k = 201; k <= 236; k++){ numerosVendidos.push({numero:k, nombre: k<=202 ? 'Lucía Ferreiro' : 'Participante ' + k, telefono: k<=202 ? '600666666' : '600' + (300000+k)}); }
+
+  function buscarGanador(){
+    var input = document.getElementById('input-numero-ganador').value.trim();
+    var num = parseInt(input, 10);
+    var box = document.getElementById('resultado-sorteo');
+
+    if(isNaN(num)){
+      box.innerHTML = '<p style="color:#A32D2D; font-size:13px; margin-top:14px;">Escribe un número válido.</p>';
+      return;
+    }
+
+    var ganador = numerosVendidos.find(function(p){ return p.numero === num; });
+    if(!ganador){
+      box.innerHTML = '<p style="color:#A32D2D; font-size:13px; margin-top:14px;">Ese número no corresponde a ninguna papeleta colocada en esta campaña. Revisa que sea correcto.</p>';
+      return;
+    }
+
+    var numTxt = String(ganador.numero).padStart(4,'0');
+    var fechaHoy = new Date().toLocaleDateString('es-ES');
+
+    var html =
+      '<div class="winner-box">' +
+      '<h3>Papeleta ' + numTxt + '</h3>' +
+      '<p style="margin:0 0 14px; font-size:14px;">' + ganador.nombre + ' · ' + ganador.telefono + '</p>' +
+      '<a class="btn" href="' + waLinkGanador(ganador, numTxt) + '" target="_blank" rel="noopener">Abrir WhatsApp con el ganador</a>' +
+      '<p class="sim-note" style="font-style:normal; margin-top:8px;">Se abre tu propio WhatsApp con el mensaje ya escrito. Lo envías tú, desde tu número — Cultum no interviene en el envío.</p>' +
+      '<div style="margin-top:18px; border-top:1px solid var(--line); padding-top:16px;">' +
+      '<p style="margin:0 0 8px; font-size:13px; font-weight:600;">Anuncio para el resto de participantes</p>' +
+      '<textarea id="texto-anuncio" readonly style="width:100%; min-height:80px; border:1px solid var(--line); border-radius:8px; padding:10px; font-family:var(--font-body); font-size:12.5px; color:var(--ink); background:#fff;">' + textoAnuncio(numTxt) + '</textarea>' +
+      '<button class="btn" style="margin-top:8px;" onclick="copiarAnuncio()">Copiar texto</button>' +
+      '<span id="copiado-msg" style="display:none; margin-left:10px; font-size:12.5px; color:var(--ok); font-weight:600;">¡Copiado!</span>' +
+      '</div>' +
+      '<div style="margin-top:18px; border-top:1px solid var(--line); padding-top:16px;">' +
+      '<p style="margin:0 0 8px; font-size:13px; font-weight:600;">Acta del resultado (para vuestro archivo)</p>' +
+      '<textarea id="texto-acta" readonly style="width:100%; min-height:90px; border:1px solid var(--line); border-radius:8px; padding:10px; font-family:var(--font-body); font-size:12.5px; color:var(--ink); background:#fff;">' + textoActa(numTxt, ganador, fechaHoy) + '</textarea>' +
+      '<button class="btn" style="margin-top:8px;" onclick="copiarActa()">Copiar acta</button>' +
+      '<span id="copiado-acta-msg" style="display:none; margin-left:10px; font-size:12.5px; color:var(--ok); font-weight:600;">¡Copiado!</span>' +
+      '<p class="sim-note">Guardad este texto junto con el justificante del método que usasteis para obtener el número (captura del sorteo de la ONCE, acta del bombo, etc.).</p>' +
+      '</div>' +
+      '</div>';
+    box.innerHTML = html;
+  }
+
+  function waLinkGanador(ganador, numTxt){
+    var limpio = ganador.telefono.replace(/\D/g,'');
+    if(limpio.length === 9){ limpio = '34' + limpio; }
+    var texto = '¡Enhorabuena, ' + ganador.nombre.split(' ')[0] + '! Tu papeleta nº ' + numTxt + ' ha resultado ganadora de la rifa del Club Voleibol Triana. Contacta con nosotros para recoger tu premio.';
+    return 'https://wa.me/' + limpio + '?text=' + encodeURIComponent(texto);
+  }
+
+  function textoAnuncio(numTxt){
+    return 'Ya tenemos ganador/a en la rifa del Club Voleibol Triana 🎉 El número agraciado ha sido el ' + numTxt + '. ¡Gracias a todos por participar y por vuestra colaboración!';
+  }
+
+  function textoActa(numTxt, ganador, fecha){
+    return 'Acta del resultado — Rifa "Club Voleibol Triana"\nFecha: ' + fecha + '\nNúmero ganador: ' + numTxt + '\nTitular: ' + ganador.nombre + ' (' + ganador.telefono + ')\nMétodo de obtención del número: [indicar aquí: ONCE/Lotería Nacional del día, bombo en acto público, etc.]';
+  }
+
+  function copiarAnuncio(){
+    var texto = document.getElementById('texto-anuncio').value;
+    if(navigator.clipboard){ navigator.clipboard.writeText(texto).catch(function(){}); }
+    var msg = document.getElementById('copiado-msg');
+    msg.style.display = 'inline';
+    setTimeout(function(){ msg.style.display = 'none'; }, 1500);
+  }
+
+  function copiarActa(){
+    var texto = document.getElementById('texto-acta').value;
+    if(navigator.clipboard){ navigator.clipboard.writeText(texto).catch(function(){}); }
+    var msg = document.getElementById('copiado-acta-msg');
+    msg.style.display = 'inline';
+    setTimeout(function(){ msg.style.display = 'none'; }, 1500);
+  }
+</script>
+</body>
+</html>

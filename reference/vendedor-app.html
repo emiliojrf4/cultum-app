@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi cupo — prototipo vendedor</title>
+<style>
+  :root{
+    --cream:#F6EFE3; --paper:#FFFBF3; --burgundy:#5B1220; --burgundy-dark:#3E0C16;
+    --gold:#B8862F; --gold-light:#E9D6A8; --ink:#2A211C; --muted:#8A7B6C; --line:#E4D8C4; --ok:#4B6C4C;
+    --font-display: Georgia, 'Palatino Linotype', 'Book Antiqua', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:#EDE6D8; font-family:var(--font-body); display:flex; justify-content:center; padding:24px 0;}
+  .device{width:380px; background:var(--cream); border-radius:28px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.18); position:relative; min-height:700px; display:flex; flex-direction:column;}
+  .statusbar{display:flex; justify-content:space-between; padding:10px 20px 2px; font-size:12px; color:var(--ink); font-weight:600;}
+  .screen{display:none; flex-direction:column; flex:1; min-height:0;}
+  .screen.active{display:flex;}
+  .content{flex:1; overflow-y:auto; padding:0 18px 18px;}
+  .app-header{padding:14px 18px 12px; display:flex; align-items:center; gap:12px;}
+  .app-header h1{font-family:var(--font-display); font-size:21px; font-weight:normal; color:var(--burgundy); margin:0;}
+  .back-btn{width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--paper); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .back-btn svg{width:16px; height:16px; stroke:var(--ink);}
+  .section-title{font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin:18px 0 10px;}
+
+  .metric-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:4px 0 18px;}
+  .metric-card{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 8px; text-align:center;}
+  .metric-card .num{font-size:19px; font-weight:700; color:var(--burgundy);}
+  .metric-card .lbl{font-size:10.5px; color:var(--muted); margin-top:3px; line-height:1.3;}
+  .progress-track{height:5px; border-radius:4px; background:var(--line); margin-bottom:20px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--gold);}
+
+  .sale-row{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line);}
+  .sale-row:last-child{border-bottom:none;}
+  .sale-row h4{margin:0; font-size:14px; color:var(--ink); font-weight:600;}
+  .sale-row p{margin:2px 0 0; font-size:12px; color:var(--muted);}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
+  .field input{width:100%; border:1px solid var(--line); border-radius:10px; padding:12px; font-size:14px; background:var(--paper); font-family:var(--font-body); color:var(--ink);}
+  .field input:focus{outline:none; border-color:var(--burgundy);}
+  .field-error{font-size:12px; color:#A32D2D; margin-top:6px; display:none;}
+  .field-error.show{display:block;}
+
+  .stepper{display:flex; align-items:center; gap:14px;}
+  .stepper button{width:34px; height:34px; border-radius:50%; border:1px solid var(--burgundy); background:var(--paper); color:var(--burgundy); font-size:18px; cursor:pointer;}
+  .stepper span{min-width:20px; text-align:center; font-size:16px; font-weight:600;}
+
+  .primary-btn{background:var(--burgundy); color:var(--gold-light); border:none; border-radius:12px; padding:14px; font-size:15px; font-weight:600; width:100%; cursor:pointer; font-family:var(--font-body);}
+  .primary-btn:active{background:var(--burgundy-dark);}
+  .secondary-btn{background:transparent; color:var(--burgundy); border:1px solid var(--burgundy); border-radius:12px; padding:13px; font-size:15px; font-weight:600; width:100%; cursor:pointer; margin-top:10px;}
+  .footer-fixed{padding:14px 18px 18px; border-top:1px solid var(--line); background:var(--cream);}
+
+  .pay-option{display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:10px; cursor:pointer;}
+  .pay-option.selected{border-color:var(--burgundy); background:var(--gold-light);}
+  .pay-dot{width:18px; height:18px; border-radius:50%; border:2px solid var(--muted); flex-shrink:0;}
+  .pay-option.selected .pay-dot{border-color:var(--burgundy); background:var(--burgundy);}
+
+  .confirm-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;}
+  .seal{width:76px; height:76px; border-radius:50%; border:3px solid var(--gold); display:flex; align-items:center; justify-content:center; margin-bottom:16px;}
+  .seal svg{width:34px; height:34px; stroke:var(--burgundy);}
+  .confirm-wrap h2{font-family:var(--font-display); font-size:22px; color:var(--burgundy); margin:0 0 6px; text-align:center;}
+  .confirm-wrap p{color:var(--muted); font-size:14px; text-align:center; margin:0 0 20px;}
+  .ticket{width:100%; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:0; margin-bottom:20px; position:relative; overflow:hidden;}
+  .ticket-top{padding:16px; display:flex; justify-content:space-between; align-items:center;}
+  .ticket-top div p{margin:0; font-size:12px; color:var(--muted);}
+  .ticket-top div h4{margin:2px 0 0; font-size:15px; color:var(--ink);}
+  .ticket-nums{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; max-width:150px;}
+  .num-chip{background:var(--burgundy); color:var(--gold-light); font-family:var(--font-display); font-size:12.5px; border-radius:14px; padding:5px 11px; white-space:nowrap;}
+  .ticket-divider{border-top:1px dashed var(--line); margin:0 16px;}
+  .ticket-bottom{padding:12px 16px 16px; display:flex; justify-content:space-between; font-size:12px; color:var(--muted);}
+
+  .badge{font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600;}
+  .badge.pending{background:var(--gold-light); color:var(--burgundy-dark);}
+  .badge.done{background:var(--ok); color:var(--paper);}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="statusbar"><span>9:41</span><span>Sevilla · 4G</span></div>
+
+  <!-- VENDOR HOME -->
+  <div class="screen active" id="vendor-home">
+    <div class="app-header"><h1>Mi cupo</h1></div>
+    <div class="content">
+      <p style="font-size:13px; color:var(--muted); margin:0 0 4px;">Hdad. de la Esperanza · Cruz de Mayo</p>
+      <p style="font-size:12px; color:var(--muted); margin:0 0 14px;">Números asignados: <b id="v-rango" style="color:var(--ink);">0100 – 0109</b></p>
+      <div class="metric-grid">
+        <div class="metric-card"><div class="num" id="v-cupo">10</div><div class="lbl">Cupo asignado</div></div>
+        <div class="metric-card"><div class="num" id="v-vendidas">6</div><div class="lbl">Colocadas</div></div>
+        <div class="metric-card"><div class="num" id="v-disponibles">4</div><div class="lbl">Disponibles</div></div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="v-progress" style="width:60%"></div></div>
+      <p style="font-size:13px; color:var(--muted); margin:-8px 0 18px;">Efectivo por liquidar: <b id="v-pendiente" style="color:var(--ink);">8 €</b></p>
+
+      <div class="section-title">Colaboraciones recientes</div>
+      <div id="v-sales-list"></div>
+    </div>
+    <div class="footer-fixed">
+      <button class="primary-btn" id="v-vender-btn" onclick="openSellForm()">Registrar colaboración</button>
+      <button class="secondary-btn" id="v-solicitar-btn" onclick="solicitarMas()" style="display:none;">Solicitar más papeletas</button>
+      <button class="secondary-btn" id="v-liquidar-btn" onclick="renderLiquidateScreen(); nav('liquidate');" style="display:none;">Liquidar efectivo con la hermandad</button>
+    </div>
+  </div>
+
+  <!-- SELL -->
+  <div class="screen" id="sell-ticket">
+    <div class="app-header"><div class="back-btn" onclick="nav('vendor-home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div><h1>Nueva colaboración</h1></div>
+    <div class="content">
+      <div class="field">
+        <label>Nombre de quien colabora</label>
+        <input type="text" id="s-nombre" placeholder="Nombre y apellido">
+        <div class="field-error" id="s-nombre-err">Escribe el nombre de quien colabora.</div>
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="tel" id="s-telefono" placeholder="600 000 000">
+        <div class="field-error" id="s-telefono-err">Escribe un teléfono para enviarle su papeleta.</div>
+      </div>
+      <div class="section-title" style="margin-top:4px;">Cantidad de papeletas</div>
+      <div class="stepper" style="margin-bottom:18px;">
+        <button onclick="changeSellQty(-1)">–</button>
+        <span id="s-qty">1</span>
+        <button onclick="changeSellQty(1)">+</button>
+        <span style="margin-left:auto; font-size:15px; color:var(--muted);" id="s-total">2 €</span>
+      </div>
+      <div class="section-title">Método de cobro</div>
+      <div class="pay-option selected" id="s-pay-bizum" onclick="selectSellPay('bizum')"><div class="pay-dot"></div><span>Bizum al momento</span></div>
+      <div class="pay-option" id="s-pay-efectivo" onclick="selectSellPay('efectivo')"><div class="pay-dot"></div><span>Efectivo</span></div>
+    </div>
+    <div class="footer-fixed">
+      <button class="primary-btn" onclick="submitSale()">Registrar</button>
+    </div>
+  </div>
+
+  <!-- LIQUIDATE -->
+  <div class="screen" id="liquidate">
+    <div class="app-header"><div class="back-btn" onclick="nav('vendor-home')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div><h1>Liquidar efectivo</h1></div>
+    <div class="content">
+      <p style="font-size:13px; color:var(--muted); margin:0 0 14px;">Estos donativos en efectivo están pendientes de ingresar. Haz un único Bizum por el total y márcalos como liquidados.</p>
+      <div id="liq-list"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-top:1px solid var(--line); margin-top:6px;">
+        <span style="font-size:14px; color:var(--ink);">Total a ingresar</span>
+        <span style="font-size:22px; color:var(--burgundy); font-weight:600;" id="liq-total">0 €</span>
+      </div>
+    </div>
+    <div class="footer-fixed">
+      <button class="primary-btn" onclick="confirmLiquidate()">Ya he enviado el Bizum</button>
+    </div>
+  </div>
+
+  <!-- SELL CONFIRM -->
+  <div class="screen" id="sell-confirm">
+    <div class="confirm-wrap">
+      <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h2>Colaboración registrada</h2>
+      <p id="sc-message">Mensaje de estado.</p>
+      <div class="ticket">
+        <div class="ticket-top">
+          <div><p>Colabora</p><h4 id="sc-nombre">Nombre</h4></div>
+          <div class="ticket-nums" id="sc-nums"></div>
+        </div>
+        <div class="ticket-divider"></div>
+        <div class="ticket-bottom"><span id="sc-cantidad">1 papeleta</span><span id="sc-metodo">Bizum</span></div>
+      </div>
+      <button class="primary-btn" onclick="openSellForm()">Registrar otra</button>
+      <button class="secondary-btn" onclick="nav('vendor-home')">Volver a mi cupo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var vendor = {
+    cupo: 10,
+    numeroInicio: 100,
+    precio: 2,
+    solicitudEnviada: false,
+    ventas: [
+      {nombre:'María Gómez', cantidad:1, metodo:'bizum', estado:'cobrada', numeros:[100]},
+      {nombre:'Pepe Lara', cantidad:2, metodo:'efectivo', estado:'pendiente', numeros:[101,102]},
+      {nombre:'Curro Vidal', cantidad:3, metodo:'efectivo', estado:'pendiente', numeros:[103,104,105]}
+    ]
+  };
+  var sellQty = 1;
+  var sellPay = 'bizum';
+
+  function nav(id){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    document.getElementById(id).classList.add('active');
+  }
+
+  function renderVendorHome(){
+    var colocadas = vendor.ventas.reduce(function(sum, v){ return sum + v.cantidad; }, 0);
+    var disponibles = Math.max(0, vendor.cupo - colocadas);
+    var pendientes = vendor.ventas.filter(function(v){ return v.metodo === 'efectivo' && v.estado === 'pendiente'; });
+    var pendienteEfectivo = pendientes.reduce(function(sum, v){ return sum + v.cantidad * vendor.precio; }, 0);
+    var numFin = vendor.numeroInicio + vendor.cupo - 1;
+
+    document.getElementById('v-rango').textContent = String(vendor.numeroInicio).padStart(4,'0') + ' – ' + String(numFin).padStart(4,'0');
+    document.getElementById('v-cupo').textContent = vendor.cupo;
+    document.getElementById('v-vendidas').textContent = colocadas;
+    document.getElementById('v-disponibles').textContent = disponibles;
+    document.getElementById('v-pendiente').textContent = pendienteEfectivo + ' €';
+    document.getElementById('v-progress').style.width = Math.min(100, (colocadas / vendor.cupo) * 100) + '%';
+    document.getElementById('v-liquidar-btn').style.display = pendientes.length > 0 ? 'block' : 'none';
+
+    var agotado = disponibles <= 0;
+    document.getElementById('v-vender-btn').style.display = agotado ? 'none' : 'block';
+    document.getElementById('v-solicitar-btn').style.display = agotado ? 'block' : 'none';
+    document.getElementById('v-solicitar-btn').textContent = vendor.solicitudEnviada ? 'Solicitud enviada ✓' : 'Solicitar más papeletas';
+
+    var list = document.getElementById('v-sales-list');
+    list.innerHTML = '';
+    vendor.ventas.slice().reverse().forEach(function(v){
+      var row = document.createElement('div');
+      row.className = 'sale-row';
+      var metodoLabel = v.metodo === 'bizum' ? 'Bizum' : 'Efectivo';
+      var badgeClass = v.estado === 'cobrada' ? 'done' : (v.estado === 'liquidada' ? 'done' : 'pending');
+      var badgeLabel = v.estado === 'cobrada' ? 'Cobrada' : (v.estado === 'liquidada' ? 'Liquidada' : 'Pendiente');
+      var numsTxt = v.numeros.map(function(n){ return String(n).padStart(4,'0'); }).join(', ');
+      row.innerHTML = '<div><h4>' + v.nombre + '</h4><p>' + v.cantidad + (v.cantidad === 1 ? ' papeleta · ' : ' papeletas · ') + metodoLabel + ' · nº ' + numsTxt + '</p></div><span class="badge ' + badgeClass + '">' + badgeLabel + '</span>';
+      list.appendChild(row);
+    });
+  }
+
+  function solicitarMas(){
+    vendor.solicitudEnviada = true;
+    document.getElementById('v-solicitar-btn').textContent = 'Solicitud enviada ✓';
+    document.getElementById('v-solicitar-btn').disabled = true;
+  }
+
+  function disponibles(){
+    var colocadas = vendor.ventas.reduce(function(sum, v){ return sum + v.cantidad; }, 0);
+    return Math.max(0, vendor.cupo - colocadas);
+  }
+
+  function openSellForm(){
+    if(disponibles() <= 0){ return; }
+    sellQty = 1; sellPay = 'bizum';
+    document.getElementById('s-nombre').value = '';
+    document.getElementById('s-telefono').value = '';
+    document.getElementById('s-nombre-err').classList.remove('show');
+    document.getElementById('s-telefono-err').classList.remove('show');
+    document.getElementById('s-qty').textContent = sellQty;
+    document.getElementById('s-total').textContent = (sellQty * vendor.precio) + ' €';
+    selectSellPay('bizum');
+    nav('sell-ticket');
+  }
+
+  function changeSellQty(delta){
+    sellQty = Math.max(1, Math.min(disponibles(), sellQty + delta));
+    document.getElementById('s-qty').textContent = sellQty;
+    document.getElementById('s-total').textContent = (sellQty * vendor.precio) + ' €';
+  }
+
+  function selectSellPay(method){
+    sellPay = method;
+    document.getElementById('s-pay-bizum').classList.toggle('selected', method === 'bizum');
+    document.getElementById('s-pay-efectivo').classList.toggle('selected', method === 'efectivo');
+  }
+
+  function submitSale(){
+    var nombre = document.getElementById('s-nombre').value.trim();
+    var telefono = document.getElementById('s-telefono').value.trim();
+    var nombreErr = document.getElementById('s-nombre-err');
+    var telefonoErr = document.getElementById('s-telefono-err');
+    var valid = true;
+    if(!nombre){ nombreErr.classList.add('show'); valid = false; } else { nombreErr.classList.remove('show'); }
+    if(!telefono){ telefonoErr.classList.add('show'); valid = false; } else { telefonoErr.classList.remove('show'); }
+    if(sellQty > disponibles()){ valid = false; }
+    if(!valid){ return; }
+
+    var estado = sellPay === 'bizum' ? 'cobrada' : 'pendiente';
+    var colocadasActuales = vendor.ventas.reduce(function(sum, v){ return sum + v.cantidad; }, 0);
+    var numeros = [];
+    for(var i = 0; i < sellQty; i++){ numeros.push(vendor.numeroInicio + colocadasActuales + i); }
+    vendor.ventas.push({nombre: nombre, cantidad: sellQty, metodo: sellPay, estado: estado, numeros: numeros});
+
+    document.getElementById('sc-nombre').textContent = nombre;
+    var numsBox = document.getElementById('sc-nums');
+    numsBox.innerHTML = '';
+    numeros.forEach(function(n){
+      var chip = document.createElement('span');
+      chip.className = 'num-chip';
+      chip.textContent = String(n).padStart(4,'0');
+      numsBox.appendChild(chip);
+    });
+    document.getElementById('sc-cantidad').textContent = sellQty + (sellQty === 1 ? ' papeleta' : ' papeletas');
+    document.getElementById('sc-metodo').textContent = sellPay === 'bizum' ? 'Bizum' : 'Efectivo';
+    document.getElementById('sc-message').textContent = sellPay === 'bizum'
+      ? 'Se ha enviado un enlace de pago por Bizum al ' + telefono + '. En cuanto lo pague, quedará "cobrada".'
+      : 'Registrada como colaboración en efectivo. Recuerda liquidar ese dinero con la hermandad.';
+
+    renderVendorHome();
+    nav('sell-confirm');
+  }
+
+  function renderLiquidateScreen(){
+    var pendientes = vendor.ventas.filter(function(v){ return v.metodo === 'efectivo' && v.estado === 'pendiente'; });
+    var total = pendientes.reduce(function(sum, v){ return sum + v.cantidad * vendor.precio; }, 0);
+    var list = document.getElementById('liq-list');
+    list.innerHTML = '';
+    pendientes.forEach(function(v){
+      var row = document.createElement('div');
+      row.className = 'sale-row';
+      row.innerHTML = '<div><h4>' + v.nombre + '</h4><p>' + v.cantidad + (v.cantidad === 1 ? ' papeleta' : ' papeletas') + '</p></div><span style="font-size:14px; color:var(--ink); font-weight:600;">' + (v.cantidad * vendor.precio) + ' €</span>';
+      list.appendChild(row);
+    });
+    document.getElementById('liq-total').textContent = total + ' €';
+  }
+
+  function confirmLiquidate(){
+    vendor.ventas.forEach(function(v){
+      if(v.metodo === 'efectivo' && v.estado === 'pendiente'){ v.estado = 'liquidada'; }
+    });
+    renderVendorHome();
+    nav('vendor-home');
+  }
+
+  renderVendorHome();
+</script>
+</body>
+</html>
