@@ -18,11 +18,13 @@ export function CopyLink({ url, compact = false }: { url: string; compact?: bool
   if (compact) {
     return (
       <div className="flex items-center gap-2">
-        <code className="text-xs text-[#8A7B6C]">{url}</code>
+        <code className="max-w-[110px] overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[#8A7B6C]" title={url}>
+          {url}
+        </code>
         <button
           type="button"
           onClick={copiar}
-          className="whitespace-nowrap rounded border border-[#E4D8C4] px-2 py-0.5 text-[11px] text-[#5B1220]"
+          className="shrink-0 whitespace-nowrap rounded border border-[#E4D8C4] px-2 py-0.5 text-[11px] text-[#5B1220]"
         >
           {copiado ? "¡Copiado!" : "Copiar"}
         </button>
