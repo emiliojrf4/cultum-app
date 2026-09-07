@@ -109,3 +109,27 @@ export async function crearPersona(campanaId: string, formData: FormData) {
 
   revalidatePath(`/admin/campanas/${campanaId}`);
 }
+
+export async function actualizarPersona(personaId: string, campanaId: string, formData: FormData) {
+  const nombre = str(formData, "nombre");
+  const telefono = str(formData, "telefono");
+  if (!nombre || !telefono) {
+    throw new Error("Nombre y teléfono son obligatorios");
+  }
+
+  const { error } = await supabaseAdmin.from("personas").update({ nombre, telefono }).eq("id", personaId);
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/admin/campanas/${campanaId}`);
+}
+
+export async function eliminarPersona(personaId: string, campanaId: string) {
+  const { error } = await supabaseAdmin.from("personas").delete().eq("id", personaId);
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/admin/campanas/${campanaId}`);
+}

@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import type { Campana, MetodoPago, Persona, Venta } from "@/lib/types";
 import { PersonaForm } from "./persona-form";
 import { CopyLink } from "./copy-link";
+import { PersonaRow } from "./persona-row";
 
 const SITE_URL = "https://cultum-app.vercel.app";
 
@@ -124,42 +125,23 @@ export default async function CampanaAdminPage({
               <th className="px-3 py-2">Confirmado</th>
               {!sinPapeletas && <th className="px-3 py-2">Efectivo pend.</th>}
               <th className="px-3 py-2">Enlace</th>
+              <th className="px-3 py-2"></th>
             </tr>
           </thead>
           <tbody>
-            {personasList.map((p) => {
-              const stats = porPersona.get(p.id) ?? { vendidas: 0, confirmado: 0, pendiente: 0 };
-              return (
-                <tr key={p.id} className="border-b border-[#E4D8C4] last:border-0">
-                  <td className="px-3 py-2">{p.nombre}</td>
-                  <td className="px-3 py-2">{p.telefono}</td>
-                  {!sinPapeletas && (
-                    <td className="px-3 py-2">
-                      {p.rango_inicio !== null
-                        ? `${String(p.rango_inicio).padStart(4, "0")}–${String(p.rango_fin).padStart(4, "0")}`
-                        : "—"}
-                    </td>
-                  )}
-                  {!sinPapeletas && <td className="px-3 py-2">{stats.vendidas}</td>}
-                  <td className="px-3 py-2">{euro.format(stats.confirmado)}</td>
-                  {!sinPapeletas && (
-                    <td className="px-3 py-2">
-                      {stats.pendiente > 0 ? (
-                        <span className="font-semibold text-[#93641F]">{euro.format(stats.pendiente)}</span>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                  )}
-                  <td className="px-3 py-2">
-                    <CopyLink url={`${SITE_URL}/p/${p.enlace_token}`} compact />
-                  </td>
-                </tr>
-              );
-            })}
+            {personasList.map((p) => (
+              <PersonaRow
+                key={p.id}
+                persona={p}
+                campanaId={c.id}
+                url={`${SITE_URL}/p/${p.enlace_token}`}
+                sinPapeletas={sinPapeletas}
+                stats={porPersona.get(p.id) ?? { vendidas: 0, confirmado: 0, pendiente: 0 }}
+              />
+            ))}
             {!personasList.length && (
               <tr>
-                <td colSpan={sinPapeletas ? 4 : 7} className="px-3 py-3 text-[#8A7B6C]">
+                <td colSpan={sinPapeletas ? 5 : 8} className="px-3 py-3 text-[#8A7B6C]">
                   Todavía no hay {sinPapeletas ? "donantes" : "costaleros"} dados de alta.
                 </td>
               </tr>
