@@ -90,7 +90,8 @@ export default async function CampanaAdminPage({
 
       <div className="mb-6 rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3] p-4">
         <p className="mb-2 text-xs text-[#8A7B6C]">
-          Enlace de seguimiento para la entidad (solo lectura, sin contraseña — pásaselo a la entidad):
+          Enlace de seguimiento para la entidad (sin contraseña — pásaselo a la entidad; puede ver la
+          recaudación y confirmar el efectivo que le entreguen en mano):
         </p>
         <CopyLink url={`${SITE_URL}/e/${c.entidad_token}`} />
       </div>

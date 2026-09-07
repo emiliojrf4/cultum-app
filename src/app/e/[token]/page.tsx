@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import type { Campana, MetodoPago, Persona, Venta } from "@/lib/types";
+import { ConfirmarEfectivo } from "./confirmar-efectivo";
 
 const euro = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
 const fecha = new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
@@ -53,12 +54,13 @@ export default async function EntidadPage({
   const nombrePersona = new Map(personasList.map((p) => [p.id, p.nombre]));
   const historial = ventas.slice(0, 100);
 
-  const porPersona = new Map<string, { confirmado: number; vendidas: number }>();
+  const porPersona = new Map<string, { confirmado: number; vendidas: number; pendienteEfectivo: number }>();
   for (const v of ventas) {
     if (!v.persona_id) continue;
-    const acc = porPersona.get(v.persona_id) ?? { confirmado: 0, vendidas: 0 };
+    const acc = porPersona.get(v.persona_id) ?? { confirmado: 0, vendidas: 0, pendienteEfectivo: 0 };
     acc.vendidas += 1;
     if (v.estado === "pagado" || v.estado === "liquidado") acc.confirmado += Number(v.importe);
+    if (v.estado === "pendiente" && v.metodo_pago === "efectivo") acc.pendienteEfectivo += Number(v.importe);
     porPersona.set(v.persona_id, acc);
   }
 
@@ -66,7 +68,7 @@ export default async function EntidadPage({
     <div className="min-h-screen bg-[#EDE6D8]">
       <header className="bg-[#5B1220] px-6 py-5 text-[#E9D6A8]">
         <p className="font-serif text-lg">Cultum</p>
-        <p className="text-xs opacity-80">Seguimiento de campaña — solo lectura</p>
+        <p className="text-xs opacity-80">Seguimiento de campaña</p>
       </header>
 
       <main className="mx-auto max-w-3xl px-5 py-8">
@@ -119,12 +121,13 @@ export default async function EntidadPage({
                     <th className="px-3 py-2">Nombre</th>
                     {!sinPapeletas && <th className="px-3 py-2">Números</th>}
                     <th className="px-3 py-2">Confirmado</th>
+                    {!sinPapeletas && <th className="px-3 py-2">Efectivo pend.</th>}
                     <th className="px-3 py-2">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
                   {personasList.map((p) => {
-                    const stats = porPersona.get(p.id) ?? { confirmado: 0, vendidas: 0 };
+                    const stats = porPersona.get(p.id) ?? { confirmado: 0, vendidas: 0, pendienteEfectivo: 0 };
                     const haColaborado = stats.confirmado > 0;
                     return (
                       <tr key={p.id} className="border-b border-[#E4D8C4] last:border-0">
@@ -137,6 +140,18 @@ export default async function EntidadPage({
                           </td>
                         )}
                         <td className="px-3 py-2">{euro.format(stats.confirmado)}</td>
+                        {!sinPapeletas && (
+                          <td className="px-3 py-2">
+                            {stats.pendienteEfectivo > 0 ? (
+                              <div className="flex flex-col items-start gap-1">
+                                <span className="font-semibold text-[#93641F]">{euro.format(stats.pendienteEfectivo)}</span>
+                                <ConfirmarEfectivo personaId={p.id} nombre={p.nombre} />
+                              </div>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                        )}
                         <td className="px-3 py-2">
                           <span
                             className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${
