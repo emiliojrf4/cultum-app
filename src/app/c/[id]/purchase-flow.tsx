@@ -75,9 +75,41 @@ export function PurchaseFlow({ campana }: { campana: Campana }) {
           <p className="mb-4 text-sm leading-relaxed text-[#2A211C]">{campana.descripcion}</p>
         )}
 
-        <div className="flex justify-between border-y border-[#E4D8C4] py-3 text-sm text-[#8A7B6C]">
-          <span>{esRifa ? "Precio por papeleta" : tienePapeletas ? "Donativo por papeleta" : "Importe del donativo"}</span>
-          <b className="text-[#2A211C]">{euro.format(precioUnidad)}</b>
+        {!esRifa && campana.obsequio_nombre && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-[#E4D8C4] bg-[#FFFBF3] p-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E9D6A8] text-lg">
+              🎁
+            </div>
+            <div>
+              <p className="text-[11px] text-[#8A7B6C]">Obsequio por tu colaboración</p>
+              <p className="text-sm font-semibold text-[#2A211C]">{campana.obsequio_nombre}</p>
+            </div>
+          </div>
+        )}
+
+        {esRifa && campana.premio_nombre && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-[#E4D8C4] bg-[#FFFBF3] p-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E9D6A8] text-lg">
+              🏆
+            </div>
+            <div>
+              <p className="text-[11px] text-[#8A7B6C]">Premio del sorteo</p>
+              <p className="text-sm font-semibold text-[#2A211C]">{campana.premio_nombre}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="divide-y divide-[#E4D8C4] border-y border-[#E4D8C4]">
+          <div className="flex justify-between py-3 text-sm text-[#8A7B6C]">
+            <span>{esRifa ? "Precio por papeleta" : tienePapeletas ? "Donativo por papeleta" : "Importe del donativo"}</span>
+            <b className="text-[#2A211C]">{euro.format(precioUnidad)}</b>
+          </div>
+          {campana.fecha_texto && (
+            <div className="flex justify-between py-3 text-sm text-[#8A7B6C]">
+              <span>{esRifa ? "Fecha del sorteo" : "Campaña abierta hasta"}</span>
+              <b className="text-[#2A211C]">{campana.fecha_texto}</b>
+            </div>
+          )}
         </div>
 
         {esRifa && (
