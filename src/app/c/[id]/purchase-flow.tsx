@@ -5,11 +5,17 @@ import type { Campana, MetodoPago } from "@/lib/types";
 
 const euro = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
 
+const inputClass =
+  "w-full rounded-lg border border-[#E4D8C4] bg-white px-3 py-2.5 text-sm text-[#2A211C]";
+const labelClass = "mb-1 block text-xs text-[#8A7B6C]";
+
 export function PurchaseFlow({ campana }: { campana: Campana }) {
   const esRifa = campana.tipo === "rifa_autorizada";
   const tienePapeletas = campana.total_papeletas !== null;
   const precioUnidad = campana.precio_papeleta ?? campana.importe_sugerido ?? 0;
 
+  const [nombre, setNombre] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [cantidad, setCantidad] = useState(1);
   const [metodoPago, setMetodoPago] = useState<MetodoPago>("bizum");
   const [enviando, setEnviando] = useState(false);
@@ -18,6 +24,10 @@ export function PurchaseFlow({ campana }: { campana: Campana }) {
   const total = precioUnidad * cantidad;
 
   async function comprar() {
+    if (!nombre.trim() || !telefono.trim()) {
+      setError("Escribe tu nombre y teléfono antes de continuar.");
+      return;
+    }
     setEnviando(true);
     setError(null);
     try {
@@ -29,6 +39,8 @@ export function PurchaseFlow({ campana }: { campana: Campana }) {
           campanaNombre: campana.nombre,
           cantidad: tienePapeletas ? cantidad : 1,
           metodoPago,
+          compradorNombre: nombre.trim(),
+          compradorTelefono: telefono.trim(),
         }),
       });
       const data = await res.json();
@@ -74,6 +86,28 @@ export function PurchaseFlow({ campana }: { campana: Campana }) {
             elección del número premiado.
           </p>
         )}
+
+        <div className="mt-5 space-y-3">
+          <div>
+            <label className={labelClass}>Tu nombre</label>
+            <input
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              className={inputClass}
+              placeholder="Nombre y apellido"
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Tu teléfono</label>
+            <input
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              className={inputClass}
+              placeholder="600 000 000"
+              type="tel"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="sticky bottom-0 border-t border-[#E4D8C4] bg-[#F6EFE3] px-5 pb-6 pt-4">

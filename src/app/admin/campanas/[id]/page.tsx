@@ -72,9 +72,17 @@ export default async function CampanaAdminPage({
 
   return (
     <div>
-      <Link href="/admin" className="mb-4 inline-block text-sm text-[#5B1220]">
-        ← Volver a campañas
-      </Link>
+      <div className="mb-4 flex items-center justify-between">
+        <Link href="/admin" className="inline-block text-sm text-[#5B1220]">
+          ← Volver a campañas
+        </Link>
+        <Link
+          href={`/admin/campanas/${c.id}/editar`}
+          className="rounded-lg border border-[#5B1220] px-3 py-1.5 text-xs font-semibold text-[#5B1220]"
+        >
+          Editar campaña
+        </Link>
+      </div>
       <p className="text-xs uppercase tracking-wide text-[#8A7B6C]">{c.entidad_nombre}</p>
       <h2 className="mb-1 font-serif text-lg text-[#5B1220]">{c.nombre}</h2>
       <p className="mb-4 text-sm text-[#8A7B6C]">

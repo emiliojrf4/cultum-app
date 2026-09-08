@@ -52,6 +52,80 @@ export async function crearCampana(formData: FormData) {
   return { id: data.id as string };
 }
 
+export async function actualizarCampana(campanaId: string, formData: FormData) {
+  const { data: campana, error: campanaError } = await supabaseAdmin
+    .from("campanas")
+    .select("tipo")
+    .eq("id", campanaId)
+    .single();
+
+  if (campanaError || !campana) {
+    throw new Error("Campaña no encontrada");
+  }
+
+  const tipo = campana.tipo as TipoCampana;
+  const entidadNombre = str(formData, "entidad_nombre");
+  const nombre = str(formData, "nombre");
+  if (!entidadNombre || !nombre) {
+    throw new Error("Entidad y título son obligatorios");
+  }
+
+  const totalPapeletas = tipo !== "donativo_sin_obsequio" ? num(formData, "total_papeletas") : null;
+  if (totalPapeletas !== null) {
+    const { data: existentes } = await supabaseAdmin
+      .from("personas")
+      .select("rango_fin")
+      .eq("campana_id", campanaId)
+      .not("rango_fin", "is", null)
+      .order("rango_fin", { ascending: false })
+      .limit(1);
+    const maxAsignado = existentes?.[0]?.rango_fin ?? 0;
+    if (totalPapeletas < maxAsignado) {
+      throw new Error(`Ya hay papeletas asignadas hasta el número ${maxAsignado}; no puedes bajar de ahí.`);
+    }
+  }
+
+  const { error } = await supabaseAdmin
+    .from("campanas")
+    .update({
+      entidad_nombre: entidadNombre,
+      nombre,
+      descripcion: str(formData, "descripcion"),
+      precio_papeleta: tipo !== "donativo_sin_obsequio" ? num(formData, "precio_papeleta") : null,
+      importe_sugerido: tipo === "donativo_sin_obsequio" ? num(formData, "importe_sugerido") : null,
+      total_papeletas: totalPapeletas,
+      obsequio_nombre: tipo === "donativo_con_obsequio" ? str(formData, "obsequio_nombre") : null,
+      premio_nombre: tipo === "rifa_autorizada" ? str(formData, "premio_nombre") : null,
+      fecha_texto: str(formData, "fecha_texto"),
+      objetivo: num(formData, "objetivo"),
+    })
+    .eq("id", campanaId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/admin");
+  revalidatePath(`/admin/campanas/${campanaId}`);
+}
+
+export async function cambiarActivaCampana(campanaId: string, activa: boolean) {
+  const { error } = await supabaseAdmin.from("campanas").update({ activa }).eq("id", campanaId);
+  if (error) {
+    throw new Error(error.message);
+  }
+  revalidatePath("/admin");
+  revalidatePath(`/admin/campanas/${campanaId}`);
+}
+
+export async function eliminarCampana(campanaId: string) {
+  const { error } = await supabaseAdmin.from("campanas").delete().eq("id", campanaId);
+  if (error) {
+    throw new Error(error.message);
+  }
+  revalidatePath("/admin");
+}
+
 export async function crearPersona(campanaId: string, formData: FormData) {
   const { data: campana, error: campanaError } = await supabaseAdmin
     .from("campanas")
