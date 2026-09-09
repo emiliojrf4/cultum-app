@@ -134,11 +134,12 @@ export default async function CampanaAdminPage({
         {sinPapeletas ? "Donantes autoregistrados" : "Colaboradores"}
       </h3>
 
+      <p className="mb-1.5 text-[11px] text-[#8A7B6C] sm:hidden">Desliza la tabla para ver más →</p>
       <div className="mb-6 overflow-x-auto rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3]">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[#E4D8C4] text-left text-[11px] uppercase tracking-wide text-[#8A7B6C]">
-              <th className="px-3 py-2">Nombre</th>
+              <th className="sticky left-0 z-10 bg-[#FFFBF3] px-3 py-2">Nombre</th>
               <th className="px-3 py-2">Teléfono</th>
               {!sinPapeletas && <th className="px-3 py-2">Números</th>}
               {!sinPapeletas && <th className="px-3 py-2">Vendidas</th>}
@@ -173,12 +174,13 @@ export default async function CampanaAdminPage({
       <PersonaForm campanaId={c.id} sinPapeletas={sinPapeletas} />
 
       <h3 className="mb-3 mt-8 font-serif text-base text-[#5B1220]">Historial de colaboraciones</h3>
+      <p className="mb-1.5 text-[11px] text-[#8A7B6C] sm:hidden">Desliza la tabla para ver más →</p>
       <div className="mb-6 overflow-x-auto rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3]">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[#E4D8C4] text-left text-[11px] uppercase tracking-wide text-[#8A7B6C]">
+              <th className="sticky left-0 z-10 bg-[#FFFBF3] px-3 py-2">Comprador</th>
               <th className="px-3 py-2">Fecha</th>
-              <th className="px-3 py-2">Comprador</th>
               <th className="px-3 py-2">Nº</th>
               <th className="px-3 py-2">Vía</th>
               <th className="px-3 py-2">Importe</th>
@@ -191,8 +193,8 @@ export default async function CampanaAdminPage({
               const badge = ESTADO_BADGE[v.estado];
               return (
                 <tr key={v.id} className="border-b border-[#E4D8C4] last:border-0">
+                  <td className="sticky left-0 z-10 bg-[#FFFBF3] px-3 py-2">{v.comprador_nombre ?? "—"}</td>
                   <td className="whitespace-nowrap px-3 py-2 text-xs text-[#8A7B6C]">{fecha.format(new Date(v.created_at))}</td>
-                  <td className="px-3 py-2">{v.comprador_nombre ?? "—"}</td>
                   <td className="px-3 py-2">{v.numero_papeleta !== null ? String(v.numero_papeleta).padStart(4, "0") : "—"}</td>
                   <td className="px-3 py-2 text-xs text-[#8A7B6C]">
                     {v.persona_id ? nombrePersona.get(v.persona_id) ?? "—" : "Enlace público"}

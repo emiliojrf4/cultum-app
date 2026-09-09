@@ -114,11 +114,12 @@ export default async function EntidadPage({
             <h2 className="mb-3 mt-8 font-serif text-base text-[#5B1220]">
               {sinPapeletas ? "Donantes registrados" : "Colaboradores"}
             </h2>
+            <p className="mb-1.5 text-[11px] text-[#8A7B6C] sm:hidden">Desliza la tabla para ver más →</p>
             <div className="overflow-x-auto rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3]">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-[#E4D8C4] text-left text-[11px] uppercase tracking-wide text-[#8A7B6C]">
-                    <th className="px-3 py-2">Nombre</th>
+                    <th className="sticky left-0 z-10 bg-[#FFFBF3] px-3 py-2">Nombre</th>
                     {!sinPapeletas && <th className="px-3 py-2">Números</th>}
                     <th className="px-3 py-2">Confirmado</th>
                     {!sinPapeletas && <th className="px-3 py-2">Efectivo pend.</th>}
@@ -131,7 +132,7 @@ export default async function EntidadPage({
                     const haColaborado = stats.confirmado > 0;
                     return (
                       <tr key={p.id} className="border-b border-[#E4D8C4] last:border-0">
-                        <td className="px-3 py-2">{p.nombre}</td>
+                        <td className="sticky left-0 z-10 bg-[#FFFBF3] px-3 py-2">{p.nombre}</td>
                         {!sinPapeletas && (
                           <td className="px-3 py-2">
                             {p.rango_inicio !== null
@@ -171,12 +172,13 @@ export default async function EntidadPage({
         )}
 
         <h2 className="mb-3 mt-8 font-serif text-base text-[#5B1220]">Colaboraciones</h2>
+        <p className="mb-1.5 text-[11px] text-[#8A7B6C] sm:hidden">Desliza la tabla para ver más →</p>
         <div className="mb-8 overflow-x-auto rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[#E4D8C4] text-left text-[11px] uppercase tracking-wide text-[#8A7B6C]">
+                <th className="sticky left-0 z-10 bg-[#FFFBF3] px-3 py-2">Nombre</th>
                 <th className="px-3 py-2">Fecha</th>
-                <th className="px-3 py-2">Nombre</th>
                 <th className="px-3 py-2">Nº</th>
                 <th className="px-3 py-2">Vía</th>
                 <th className="px-3 py-2">Importe</th>
@@ -188,8 +190,8 @@ export default async function EntidadPage({
                 const badge = ESTADO_BADGE[v.estado];
                 return (
                   <tr key={v.id} className="border-b border-[#E4D8C4] last:border-0">
+                    <td className="sticky left-0 z-10 bg-[#FFFBF3] px-3 py-2">{v.comprador_nombre ?? "—"}</td>
                     <td className="whitespace-nowrap px-3 py-2 text-xs text-[#8A7B6C]">{fecha.format(new Date(v.created_at))}</td>
-                    <td className="px-3 py-2">{v.comprador_nombre ?? "—"}</td>
                     <td className="px-3 py-2">{v.numero_papeleta !== null ? String(v.numero_papeleta).padStart(4, "0") : "—"}</td>
                     <td className="px-3 py-2 text-xs text-[#8A7B6C]">
                       {v.persona_id ? nombrePersona.get(v.persona_id) ?? "—" : "Enlace público"}

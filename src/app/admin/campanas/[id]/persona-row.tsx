@@ -116,7 +116,7 @@ export function PersonaRow({
 
   return (
     <tr className="border-b border-[#E4D8C4] last:border-0">
-      <td className="px-3 py-2">{persona.nombre}</td>
+      <td className="sticky left-0 z-10 bg-[#FFFBF3] px-3 py-2">{persona.nombre}</td>
       <td className="px-3 py-2">{persona.telefono}</td>
       {!sinPapeletas && (
         <td className="px-3 py-2">
