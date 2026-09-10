@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
   const metodoPago = body?.metodoPago as string | undefined;
   const compradorNombre = body?.compradorNombre as string | undefined;
   const compradorTelefono = body?.compradorTelefono as string | undefined;
+  const infoAdicional = (body?.infoAdicional as string | undefined) || null;
 
   if (!personaId || !enlaceToken || !cantidad || cantidad < 1 || cantidad > 50 || !compradorNombre || !compradorTelefono) {
     return NextResponse.json({ error: "Datos de la colaboración inválidos" }, { status: 400 });
@@ -25,6 +26,7 @@ export async function POST(req: NextRequest) {
     p_comprador_nombre: compradorNombre,
     p_comprador_telefono: compradorTelefono,
     p_metodo_pago: metodoPago,
+    p_info_adicional: infoAdicional,
   });
 
   if (rpcError || !ventas || ventas.length === 0) {

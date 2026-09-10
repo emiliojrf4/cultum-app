@@ -15,6 +15,7 @@ export interface Campana {
   obsequio_nombre: string | null;
   premio_nombre: string | null;
   fecha_texto: string | null;
+  campo_extra_label: string | null;
   entidad_token: string;
   autorizacion_junta: boolean;
   activa: boolean;
@@ -25,7 +26,7 @@ export interface Campana {
 // 0011_restringir_entidad_token.sql). No incluye entidad_token: consultas
 // públicas deben pedir esta lista explícita, nunca "*".
 export const PUBLIC_CAMPANA_COLUMNS =
-  "id, nombre, entidad_nombre, tipo, precio_papeleta, importe_sugerido, total_papeletas, descripcion, objetivo, obsequio_nombre, premio_nombre, fecha_texto, autorizacion_junta, activa, created_at";
+  "id, nombre, entidad_nombre, tipo, precio_papeleta, importe_sugerido, total_papeletas, descripcion, objetivo, obsequio_nombre, premio_nombre, fecha_texto, campo_extra_label, autorizacion_junta, activa, created_at";
 
 export type RolPersona = "vendedor" | "donante";
 
@@ -52,5 +53,6 @@ export interface Venta {
   metodo_pago: MetodoPago;
   estado: EstadoVenta;
   stripe_payment_id: string | null;
+  info_adicional: string | null;
   created_at: string;
 }

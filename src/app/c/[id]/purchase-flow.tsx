@@ -16,6 +16,7 @@ export function PurchaseFlow({ campana }: { campana: Campana }) {
 
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [infoAdicional, setInfoAdicional] = useState("");
   const [cantidad, setCantidad] = useState(1);
   const [metodoPago, setMetodoPago] = useState<MetodoPago>("bizum");
   const [enviando, setEnviando] = useState(false);
@@ -26,6 +27,10 @@ export function PurchaseFlow({ campana }: { campana: Campana }) {
   async function comprar() {
     if (!nombre.trim() || !telefono.trim()) {
       setError("Escribe tu nombre y teléfono antes de continuar.");
+      return;
+    }
+    if (campana.campo_extra_label && !infoAdicional.trim()) {
+      setError(`Escribe ${campana.campo_extra_label.toLowerCase()} antes de continuar.`);
       return;
     }
     setEnviando(true);
@@ -41,6 +46,7 @@ export function PurchaseFlow({ campana }: { campana: Campana }) {
           metodoPago,
           compradorNombre: nombre.trim(),
           compradorTelefono: telefono.trim(),
+          infoAdicional: campana.campo_extra_label ? infoAdicional.trim() : undefined,
         }),
       });
       const data = await res.json();
@@ -139,6 +145,16 @@ export function PurchaseFlow({ campana }: { campana: Campana }) {
               type="tel"
             />
           </div>
+          {campana.campo_extra_label && (
+            <div>
+              <label className={labelClass}>{campana.campo_extra_label}</label>
+              <input
+                value={infoAdicional}
+                onChange={(e) => setInfoAdicional(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+          )}
         </div>
       </div>
 

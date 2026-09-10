@@ -181,6 +181,7 @@ export default async function EntidadPage({
                 <th className="px-3 py-2">Fecha</th>
                 <th className="px-3 py-2">Nº</th>
                 <th className="px-3 py-2">Vía</th>
+                {c.campo_extra_label && <th className="px-3 py-2">{c.campo_extra_label}</th>}
                 <th className="px-3 py-2">Importe</th>
                 <th className="px-3 py-2">Estado</th>
               </tr>
@@ -196,6 +197,7 @@ export default async function EntidadPage({
                     <td className="px-3 py-2 text-xs text-[#8A7B6C]">
                       {v.persona_id ? nombrePersona.get(v.persona_id) ?? "—" : "Enlace público"}
                     </td>
+                    {c.campo_extra_label && <td className="px-3 py-2">{v.info_adicional ?? "—"}</td>}
                     <td className="px-3 py-2">{euro.format(Number(v.importe))}</td>
                     <td className="px-3 py-2">
                       <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.cls}`}>
@@ -207,7 +209,7 @@ export default async function EntidadPage({
               })}
               {!historial.length && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-3 text-[#8A7B6C]">
+                  <td colSpan={c.campo_extra_label ? 7 : 6} className="px-3 py-3 text-[#8A7B6C]">
                     Todavía no hay colaboraciones registradas.
                   </td>
                 </tr>

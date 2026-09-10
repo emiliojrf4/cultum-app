@@ -38,6 +38,7 @@ export async function crearCampana(formData: FormData) {
       obsequio_nombre: tipo === "donativo_con_obsequio" ? str(formData, "obsequio_nombre") : null,
       premio_nombre: tipo === "rifa_autorizada" ? str(formData, "premio_nombre") : null,
       fecha_texto: str(formData, "fecha_texto"),
+      campo_extra_label: str(formData, "campo_extra_label"),
       objetivo: num(formData, "objetivo"),
       autorizacion_junta: tipo === "rifa_autorizada" ? autorizacionJunta : false,
     })
@@ -97,6 +98,7 @@ export async function actualizarCampana(campanaId: string, formData: FormData) {
       obsequio_nombre: tipo === "donativo_con_obsequio" ? str(formData, "obsequio_nombre") : null,
       premio_nombre: tipo === "rifa_autorizada" ? str(formData, "premio_nombre") : null,
       fecha_texto: str(formData, "fecha_texto"),
+      campo_extra_label: str(formData, "campo_extra_label"),
       objetivo: num(formData, "objetivo"),
     })
     .eq("id", campanaId);

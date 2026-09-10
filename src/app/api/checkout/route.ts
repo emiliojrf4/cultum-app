@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
   const personaId = (body?.personaId as string | undefined) || null;
   const compradorNombre = (body?.compradorNombre as string | undefined) || null;
   const compradorTelefono = (body?.compradorTelefono as string | undefined) || null;
+  const infoAdicional = (body?.infoAdicional as string | undefined) || null;
   const volverA = (body?.volverA as string | undefined) || `/c/${campanaId}`;
 
   if (!campanaId || !campanaNombre || !cantidad || cantidad < 1 || cantidad > 50) {
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest) {
     p_comprador_nombre: compradorNombre,
     p_comprador_telefono: compradorTelefono,
     p_metodo_pago: metodoPago,
+    p_info_adicional: infoAdicional,
   });
 
   if (rpcError || !ventas || ventas.length === 0) {

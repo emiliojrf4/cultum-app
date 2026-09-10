@@ -60,6 +60,7 @@ export function CostaleroPanel({
   // formulario de venta
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [infoAdicional, setInfoAdicional] = useState("");
   const [cantidad, setCantidad] = useState(1);
   const [metodoPago, setMetodoPago] = useState<MetodoPago>("bizum");
 
@@ -89,6 +90,7 @@ export function CostaleroPanel({
   function abrirVender() {
     setNombre("");
     setTelefono("");
+    setInfoAdicional("");
     setCantidad(1);
     setMetodoPago("bizum");
     setError(null);
@@ -98,6 +100,10 @@ export function CostaleroPanel({
   async function registrarVenta() {
     if (!nombre.trim() || !telefono.trim()) {
       setError("Nombre y teléfono son obligatorios.");
+      return;
+    }
+    if (campana.campo_extra_label && !infoAdicional.trim()) {
+      setError(`${campana.campo_extra_label} es obligatorio.`);
       return;
     }
     setEnviando(true);
@@ -113,6 +119,7 @@ export function CostaleroPanel({
           metodoPago,
           compradorNombre: nombre.trim(),
           compradorTelefono: telefono.trim(),
+          infoAdicional: campana.campo_extra_label ? infoAdicional.trim() : undefined,
         }),
       });
       const data = await res.json();
@@ -294,6 +301,13 @@ export function CostaleroPanel({
               <label className={labelClass}>Teléfono</label>
               <input value={telefono} onChange={(e) => setTelefono(e.target.value)} className={inputClass} placeholder="600 000 000" />
             </div>
+
+            {campana.campo_extra_label && (
+              <div>
+                <label className={labelClass}>{campana.campo_extra_label}</label>
+                <input value={infoAdicional} onChange={(e) => setInfoAdicional(e.target.value)} className={inputClass} />
+              </div>
+            )}
 
             <div>
               <p className={labelClass}>Cantidad de papeletas</p>

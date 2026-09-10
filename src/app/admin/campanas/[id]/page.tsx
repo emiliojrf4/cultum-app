@@ -183,6 +183,7 @@ export default async function CampanaAdminPage({
               <th className="px-3 py-2">Fecha</th>
               <th className="px-3 py-2">Nº</th>
               <th className="px-3 py-2">Vía</th>
+              {c.campo_extra_label && <th className="px-3 py-2">{c.campo_extra_label}</th>}
               <th className="px-3 py-2">Importe</th>
               <th className="px-3 py-2">Método</th>
               <th className="px-3 py-2">Estado</th>
@@ -199,6 +200,7 @@ export default async function CampanaAdminPage({
                   <td className="px-3 py-2 text-xs text-[#8A7B6C]">
                     {v.persona_id ? nombrePersona.get(v.persona_id) ?? "—" : "Enlace público"}
                   </td>
+                  {c.campo_extra_label && <td className="px-3 py-2">{v.info_adicional ?? "—"}</td>}
                   <td className="px-3 py-2">{euro.format(Number(v.importe))}</td>
                   <td className="px-3 py-2">{METODO_LABEL[v.metodo_pago]}</td>
                   <td className="px-3 py-2">
@@ -211,7 +213,7 @@ export default async function CampanaAdminPage({
             })}
             {!historial.length && (
               <tr>
-                <td colSpan={7} className="px-3 py-3 text-[#8A7B6C]">
+                <td colSpan={c.campo_extra_label ? 8 : 7} className="px-3 py-3 text-[#8A7B6C]">
                   Todavía no hay colaboraciones registradas.
                 </td>
               </tr>

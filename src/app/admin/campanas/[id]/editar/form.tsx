@@ -94,6 +94,19 @@ export function EditarCampanaForm({ campana: c }: { campana: Campana }) {
         </div>
       </div>
 
+      <div>
+        <label className={labelClass}>Información adicional a pedir al comprador (opcional)</label>
+        <input
+          name="campo_extra_label"
+          defaultValue={c.campo_extra_label ?? ""}
+          className={inputClass}
+          placeholder='Ej: "Curso y clase del alumno", "Talla", "Edad del donante"'
+        />
+        <p className="mt-1 text-[11px] text-[#8A7B6C]">
+          Si lo rellenas, se pedirá como campo obligatorio al pagar. Si lo dejas en blanco, no se pide nada extra.
+        </p>
+      </div>
+
       {state.error && <p className="text-sm text-red-700">{state.error}</p>}
       {state.savedAt && <p className="text-sm text-[#4B6C4C]">Guardado.</p>}
 
