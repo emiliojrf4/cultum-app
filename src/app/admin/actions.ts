@@ -20,6 +20,9 @@ function str(formData: FormData, key: string): string | null {
 export async function crearCampana(formData: FormData) {
   const tipo = formData.get("tipo") as TipoCampana;
   const autorizacionJunta = formData.get("autorizacion_junta") === "on";
+  const usarPapeletas = formData.get("usar_papeletas") !== "no";
+  const conPapeletas = tipo === "rifa_autorizada" || (tipo === "donativo_con_obsequio" && usarPapeletas);
+  const conImporteLibre = tipo === "donativo_sin_obsequio" || (tipo === "donativo_con_obsequio" && !usarPapeletas);
 
   if (tipo === "rifa_autorizada" && !autorizacionJunta) {
     throw new Error("Para crear una rifa autorizada hay que confirmar la autorización y fianza.");
@@ -32,9 +35,9 @@ export async function crearCampana(formData: FormData) {
       nombre: str(formData, "nombre"),
       descripcion: str(formData, "descripcion"),
       tipo,
-      precio_papeleta: tipo !== "donativo_sin_obsequio" ? num(formData, "precio_papeleta") : null,
-      importe_sugerido: tipo === "donativo_sin_obsequio" ? num(formData, "importe_sugerido") : null,
-      total_papeletas: tipo !== "donativo_sin_obsequio" ? num(formData, "total_papeletas") : null,
+      precio_papeleta: conPapeletas ? num(formData, "precio_papeleta") : null,
+      importe_sugerido: conImporteLibre ? num(formData, "importe_sugerido") : null,
+      total_papeletas: conPapeletas ? num(formData, "total_papeletas") : null,
       obsequio_nombre: tipo === "donativo_con_obsequio" ? str(formData, "obsequio_nombre") : null,
       premio_nombre: tipo === "rifa_autorizada" ? str(formData, "premio_nombre") : null,
       fecha_texto: str(formData, "fecha_texto"),
@@ -56,7 +59,7 @@ export async function crearCampana(formData: FormData) {
 export async function actualizarCampana(campanaId: string, formData: FormData) {
   const { data: campana, error: campanaError } = await supabaseAdmin
     .from("campanas")
-    .select("tipo")
+    .select("tipo, total_papeletas")
     .eq("id", campanaId)
     .single();
 
@@ -65,13 +68,16 @@ export async function actualizarCampana(campanaId: string, formData: FormData) {
   }
 
   const tipo = campana.tipo as TipoCampana;
+  // Si ya tiene (o no tiene) papeletas numeradas, eso no se puede cambiar
+  // tras crear la campaña — lo decide el estado actual, no un checkbox nuevo.
+  const conPapeletas = tipo === "rifa_autorizada" || (tipo === "donativo_con_obsequio" && campana.total_papeletas !== null);
   const entidadNombre = str(formData, "entidad_nombre");
   const nombre = str(formData, "nombre");
   if (!entidadNombre || !nombre) {
     throw new Error("Entidad y título son obligatorios");
   }
 
-  const totalPapeletas = tipo !== "donativo_sin_obsequio" ? num(formData, "total_papeletas") : null;
+  const totalPapeletas = conPapeletas ? num(formData, "total_papeletas") : null;
   if (totalPapeletas !== null) {
     const { data: existentes } = await supabaseAdmin
       .from("personas")
@@ -92,8 +98,8 @@ export async function actualizarCampana(campanaId: string, formData: FormData) {
       entidad_nombre: entidadNombre,
       nombre,
       descripcion: str(formData, "descripcion"),
-      precio_papeleta: tipo !== "donativo_sin_obsequio" ? num(formData, "precio_papeleta") : null,
-      importe_sugerido: tipo === "donativo_sin_obsequio" ? num(formData, "importe_sugerido") : null,
+      precio_papeleta: conPapeletas ? num(formData, "precio_papeleta") : null,
+      importe_sugerido: !conPapeletas ? num(formData, "importe_sugerido") : null,
       total_papeletas: totalPapeletas,
       obsequio_nombre: tipo === "donativo_con_obsequio" ? str(formData, "obsequio_nombre") : null,
       premio_nombre: tipo === "rifa_autorizada" ? str(formData, "premio_nombre") : null,

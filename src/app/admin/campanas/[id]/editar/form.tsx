@@ -21,6 +21,7 @@ export function EditarCampanaForm({ campana: c }: { campana: Campana }) {
   }
 
   const [state, formAction, pending] = useActionState(action, { error: null, savedAt: null });
+  const conPapeletas = c.tipo === "rifa_autorizada" || (c.tipo === "donativo_con_obsequio" && c.total_papeletas !== null);
 
   return (
     <form action={formAction} className="space-y-5 rounded-2xl border border-[#E4D8C4] bg-[#FFFBF3] p-5">
@@ -41,18 +42,34 @@ export function EditarCampanaForm({ campana: c }: { campana: Campana }) {
       </div>
 
       {c.tipo === "donativo_con_obsequio" && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelClass}>Obsequio</label>
-            <input name="obsequio_nombre" defaultValue={c.obsequio_nombre ?? ""} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Donativo por papeleta (€)</label>
-            <input name="precio_papeleta" type="number" step="0.01" required defaultValue={c.precio_papeleta ?? ""} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Número total de papeletas</label>
-            <input name="total_papeletas" type="number" required defaultValue={c.total_papeletas ?? ""} className={inputClass} />
+        <div className="space-y-4">
+          <p className="text-[11px] text-[#8A7B6C]">
+            {conPapeletas
+              ? "Con papeletas numeradas y cupos por colaborador (no se puede cambiar tras crear la campaña)."
+              : "Importe único, sin papeletas numeradas (no se puede cambiar tras crear la campaña)."}
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Obsequio</label>
+              <input name="obsequio_nombre" defaultValue={c.obsequio_nombre ?? ""} className={inputClass} />
+            </div>
+            {conPapeletas ? (
+              <>
+                <div>
+                  <label className={labelClass}>Donativo por papeleta (€)</label>
+                  <input name="precio_papeleta" type="number" step="0.01" required defaultValue={c.precio_papeleta ?? ""} className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Número total de papeletas</label>
+                  <input name="total_papeletas" type="number" required defaultValue={c.total_papeletas ?? ""} className={inputClass} />
+                </div>
+              </>
+            ) : (
+              <div>
+                <label className={labelClass}>Importe del donativo (€)</label>
+                <input name="importe_sugerido" type="number" step="0.01" required defaultValue={c.importe_sugerido ?? ""} className={inputClass} />
+              </div>
+            )}
           </div>
         </div>
       )}

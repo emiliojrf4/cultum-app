@@ -14,6 +14,7 @@ const labelClass = "mb-1 block text-xs text-[#8A7B6C]";
 export function NuevaCampanaForm() {
   const router = useRouter();
   const [tipo, setTipo] = useState<TipoCampana>("donativo_con_obsequio");
+  const [usarPapeletas, setUsarPapeletas] = useState(true);
 
   async function action(_prev: State, formData: FormData): Promise<State> {
     try {
@@ -51,6 +52,7 @@ export function NuevaCampanaForm() {
         ))}
       </div>
       <input type="hidden" name="tipo" value={tipo} />
+      <input type="hidden" name="usar_papeletas" value={usarPapeletas ? "si" : "no"} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
@@ -69,19 +71,52 @@ export function NuevaCampanaForm() {
       </div>
 
       {tipo === "donativo_con_obsequio" && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-4">
           <div>
             <label className={labelClass}>Obsequio</label>
-            <input name="obsequio_nombre" className={inputClass} placeholder="Pulsera bordada" />
+            <input name="obsequio_nombre" className={inputClass} placeholder="Pulsera bordada, agenda escolar..." />
           </div>
-          <div>
-            <label className={labelClass}>Donativo por papeleta (€)</label>
-            <input name="precio_papeleta" type="number" step="0.01" required className={inputClass} placeholder="2" />
+
+          <div className="flex gap-2">
+            {(
+              [
+                [true, "Con papeletas numeradas", "Reparte cupos entre colaboradores (hermandades)"],
+                [false, "Importe único", "Sin numeración, cada uno paga directamente (AMPAs, clubes)"],
+              ] as const
+            ).map(([value, title, sub]) => (
+              <button
+                type="button"
+                key={String(value)}
+                onClick={() => setUsarPapeletas(value)}
+                className={`flex-1 rounded-lg border p-2.5 text-left ${
+                  usarPapeletas === value ? "border-[#5B1220] bg-[#E9D6A8]" : "border-[#E4D8C4] bg-white"
+                }`}
+              >
+                <div className="text-[12.5px] font-semibold">{title}</div>
+                <div className="text-[10.5px] text-[#8A7B6C]">{sub}</div>
+              </button>
+            ))}
           </div>
-          <div>
-            <label className={labelClass}>Número total de papeletas</label>
-            <input name="total_papeletas" type="number" required className={inputClass} placeholder="1000" />
-          </div>
+
+          {usarPapeletas ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Donativo por papeleta (€)</label>
+                <input name="precio_papeleta" type="number" step="0.01" required className={inputClass} placeholder="2" />
+              </div>
+              <div>
+                <label className={labelClass}>Número total de papeletas</label>
+                <input name="total_papeletas" type="number" required className={inputClass} placeholder="1000" />
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Importe del donativo (€)</label>
+                <input name="importe_sugerido" type="number" step="0.01" required className={inputClass} placeholder="4" />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
