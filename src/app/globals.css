@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
+/* Cultum es una única paleta clara (crema/burdeos/oro) sin variante oscura.
+   Sin esto, los móviles con modo oscuro del sistema pueden forzar colores
+   de texto casi blancos sobre fondos claros que no los esperan (texto
+   invisible en las tablas). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #f6efe3;
+  --foreground: #2a211c;
 }
 
 @theme inline {
@@ -10,13 +15,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
